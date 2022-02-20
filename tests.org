@@ -1,0 +1,71 @@
+#+setupfile: ./settings/README.org
+#+property: header-args:hy :tangle yes
+
+* Preparations
+** Rich Traceback
+
+#+begin_src hy
+(import rich.traceback)
+(.install rich.traceback)
+#+end_src
+
+** Imports
+*** From
+
+#+begin_src hy
+(import oreo [eclair])
+(import os [path :as osPath])
+#+end_src
+
+** Zoom Decorator
+
+#+begin_src hy
+(setv funcs [])
+(defn zoom [func] (.append funcs func))
+#+end_src
+
+* Tests
+** Eclair
+
+#+begin_src hy
+#@(zoom (defn 69611341-cf92-48bb-8cda-79c7fe28d9f2 []
+              (import oreo [eclair])
+              (for [i (eclair (range 100) "69611341-cf92-48bb-8cda-79c7fe28d9f2" "red")])))
+#+end_src
+
+** Gensing
+
+#+begin_src hy
+#@(zoom (defn 9a62edb0-a552-4283-914a-b4731968b1e4 []
+              (import oreo [tea])
+              (setv test (tea :a "b" :c "d"))
+              (.append test "f")
+              (.extend test "h" "j" "l")
+              (.glue test "mnop")
+              (.glue test (tea :q "r" :s "t"))
+              (.glue test ["v" "x"])
+              (assert (test) "b d f h j lmnopr tv x")))
+#+end_src
+
+** Either?
+
+#+begin_src hy
+#@(zoom (defn 66c3744b-a036-4476-b1ae-024bc99bee41 []
+              (import oreo [either?])
+              (import collections [OrderedDict])
+              (import addict [Dict])
+              (assert (either? OrderedDict dict))
+              (assert (either? Dict dict))
+              (assert (either? OrderedDict Dict))
+              (assert (= (either? "Dict" Dict) False))
+              (assert (either? "Dict" str))
+              (assert (= (either? "Dict" Dict list) False))
+              (assert (either? "OrderedDict" "Dict"))
+              (assert (either? "OrderedDict" "Dict" list))))
+#+end_src
+
+* Run Everything
+
+#+begin_src hy
+(for [func (eclair funcs "tests" "blue")] (func))
+#+end_src
