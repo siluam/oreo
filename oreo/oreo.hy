@@ -11,7 +11,6 @@
 (import hyrule [coll?])
 (import importlib.util [spec-from-file-location module-from-spec])
 (import itertools [islice])
-(import more-itertools [always-iterable ilen])
 (import rich.progress [Progress])
 
 (require hyrule [-> assoc])
@@ -35,17 +34,19 @@
               (return module))
           (return False)))
 
-(defn sui [module attr] (-> module
-                            (module-installed)
-                            (getattr attr)
-                            (return)))
+(defn sui [*module attr]
+      (return (if (setx module (module-installed *module))
+                  (getattr module attr)
+                  module)))
 
-(defn trim [[iterable None] [ordinal "first"] [number 0]]
-      (return (if (and number iterable)
-                  (cond [(= (setx ordinal (.lower ordinal)) "first") (islice iterable 0 number)]
-                        [(= ordinal "last") (islice iterable number (ilen iterable))]
-                        [True (raise (ValueError "Sorry! `ordinal' can only take string values \"first\" and \"last\"!"))])
-                  iterable)))
+(defn trim [[iterable None] [last False] [number 0]]
+      (setv iterable (tuple iterable)
+            trim/len (len iterable))
+      (yield-from (if (and number iterable)
+                      (if last
+                          (islice iterable (- trim/len number) trim/len)
+                          (islice iterable 0 number))
+                      iterable)))
 
 (defn flatten [iterable [times None]]
       (setv lst [])
@@ -95,6 +96,8 @@
 
 (defclass ModuleCaller)
 
+(defn int? [value] (return (and (isinstance value int) (not (isinstance value bool)))))
+
 (defn either? [first-type second-type #* args]
       (setv args (, first-type second-type #* args))
       (defn inner [cls]
@@ -122,13 +125,13 @@
 
 (defn __init__ [self iterable name color]
     (setv self.color color
-          self.iterable (always-iterable iterable)
-          self.ilen (ilen iterable)
-          self.increment (/ 100 self.ilen)
+          self.iterable (tuple iterable)
+          self.len (len iterable)
+          self.increment (/ 100 self.len)
           self.n 0
           self.name name
 
-self.task (.add-task self.__class__.Progress f"[{self.color}]{self.name}" :total self.ilen))
+self.task (.add-task self.__class__.Progress f"[{self.color}]{self.name}" :total self.len))
 
 )
 
@@ -138,10 +141,10 @@ self.task (.add-task self.__class__.Progress f"[{self.color}]{self.name}" :total
     (return self))
 
 (defn __next__ [self]
-      (if (<= self.n self.ilen)
-          (do (.update self.__class__.Progress self.task :advance self.increment :refresh True)
-              (+= self.n 1)
-              (return (next self.iterable)))
+      (if (< self.n self.len)
+          (try (.update self.__class__.Progress self.task :advance self.increment :refresh True)
+               (return (get self.iterable self.n))
+               (finally (+= self.n 1)))
           (try (raise StopIteration)
                (finally (.stop self.__class__.Progress)))))
 

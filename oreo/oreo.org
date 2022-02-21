@@ -25,7 +25,6 @@
 (import hyrule [coll?])
 (import importlib.util [spec-from-file-location module-from-spec])
 (import itertools [islice])
-(import more-itertools [always-iterable ilen])
 (import rich.progress [Progress])
 #+end_src
 
@@ -75,21 +74,23 @@ Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given
 * Single Use Import
 
 #+begin_src hy
-(defn sui [module attr] (-> module
-                            (module-installed)
-                            (getattr attr)
-                            (return)))
+(defn sui [*module attr]
+      (return (if (setx module (module-installed *module))
+                  (getattr module attr)
+                  module)))
 #+end_src
 
 * Trim
 
 #+begin_src hy
-(defn trim [[iterable None] [ordinal "first"] [number 0]]
-      (return (if (and number iterable)
-                  (cond [(= (setx ordinal (.lower ordinal)) "first") (islice iterable 0 number)]
-                        [(= ordinal "last") (islice iterable number (ilen iterable))]
-                        [True (raise (ValueError "Sorry! `ordinal' can only take string values \"first\" and \"last\"!"))])
-                  iterable)))
+(defn trim [[iterable None] [last False] [number 0]]
+      (setv iterable (tuple iterable)
+            trim/len (len iterable))
+      (yield-from (if (and number iterable)
+                      (if last
+                          (islice iterable (- trim/len number) trim/len)
+                          (islice iterable 0 number))
+                      iterable)))
 #+end_src
 
 * Flatten Iterable
@@ -167,6 +168,12 @@ Adapted from [[https://stackoverflow.com/users/11769765/friedrich][Friedrich's]]
 (defclass ModuleCaller)
 #+end_src
 
+* Integer Only
+
+#+begin_src hy
+(defn int? [value] (return (and (isinstance value int) (not (isinstance value bool)))))
+#+end_src
+
 * Either Instance
 
 Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/27475071/10827766][here]];
@@ -221,9 +228,9 @@ Remember that ~metaclasses~ use ~cls~ instead of ~self~!
 #+begin_src hy
 (defn __init__ [self iterable name color]
     (setv self.color color
-          self.iterable (always-iterable iterable)
-          self.ilen (ilen iterable)
-          self.increment (/ 100 self.ilen)
+          self.iterable (tuple iterable)
+          self.len (len iterable)
+          self.increment (/ 100 self.len)
           self.n 0
           self.name name
 #+end_src
@@ -233,7 +240,7 @@ Remember that ~metaclasses~ use ~cls~ instead of ~self~!
 Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/26626707/10827766][here]], as well as [[https://stackoverflow.com/users/9567/torsten-marek][Torsten Marek's]] answer [[https://stackoverflow.com/a/328882/10827766][here]]:
 
 #+begin_src hy
-          self.task (.add-task self.__class__.Progress f"[{self.color}]{self.name}" :total self.ilen))
+          self.task (.add-task self.__class__.Progress f"[{self.color}]{self.name}" :total self.len))
 #+end_src
 
 *** End of __init__
@@ -255,10 +262,10 @@ Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn P
 
 #+begin_src hy
 (defn __next__ [self]
-      (if (<= self.n self.ilen)
-          (do (.update self.__class__.Progress self.task :advance self.increment :refresh True)
-              (+= self.n 1)
-              (return (next self.iterable)))
+      (if (< self.n self.len)
+          (try (.update self.__class__.Progress self.task :advance self.increment :refresh True)
+               (return (get self.iterable self.n))
+               (finally (+= self.n 1)))
           (try (raise StopIteration)
                (finally (.stop self.__class__.Progress)))))
 #+end_src

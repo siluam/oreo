@@ -34,4 +34,10 @@
               (assert (either? "OrderedDict" "Dict"))
               (assert (either? "OrderedDict" "Dict" list))))
 
+#@(zoom (defn 554446e6-ffb6-4469-b4d2-90282e466751 []
+              (import oreo [trim])
+              (setv ten (range 10))
+              (assert (all (gfor i (range 5) (in i (trim :iterable ten :number 5)))))
+              (assert (all (gfor i (range 5 10) (in i (trim :iterable ten :number 5 :last True)))))))
+
 (for [func (eclair funcs "tests" "blue")] (func))
