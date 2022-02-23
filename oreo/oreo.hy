@@ -15,7 +15,7 @@
 (import time [sleep])
 (import uuid [uuid4])
 
-(require hyrule [-> assoc])
+(require hyrule [-> assoc unless])
 
 (try (import coconut *)
      (except [ImportError] None))
@@ -239,9 +239,9 @@
          (any (gfor opt self.xor (in opt opts))))
     (raise (click.UsageError f"Sorry; {self.name} {self.xor-help}")))
 
-(if (not (and (not self.one-req)
-              (in self.name opts)
-              (any (gfor opt self.one-req (in opt opts)))))
+(unless (and (not self.one-req)
+             (in self.name opts)
+             (any (gfor opt self.one-req (in opt opts))))
     (raise (click.UsageError (+ "Sorry! "
                                 (if (= self.one-req-len 1) "One of " "")
                                 self.one-req-joined
