@@ -17,7 +17,7 @@ click = "*"
 hy = "^1.0a4"
 hyrule = "*"
 more-itertools = "*"
-richy = "*"
+richyrich = "*"
 toolz = "*"
 
 [tool.poetry.dev-dependencies]

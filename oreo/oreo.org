@@ -1,11 +1,11 @@
 #+setupfile: ../settings/README.org
 #+property: header-args:hy :tangle yes
 
-* Richy Traceback
+* Richyrich Traceback
 
 #+begin_src hy
-(import richy.traceback)
-(.install richy.traceback :show-locals True)
+(import richyrich.traceback)
+(.install richyrich.traceback :show-locals True)
 #+end_src
 
 * Imports
@@ -22,10 +22,10 @@
 (import autoslot [SlotsMeta])
 (import collections [OrderedDict])
 (import hy [mangle unmangle])
-(import hyrule [coll? dec])
+(import hyrule [coll? dec inc])
 (import importlib.util [spec-from-file-location module-from-spec])
 (import itertools [islice])
-(import richy.progress [Progress])
+(import richyrich.progress [Progress])
 (import time [sleep])
 (import uuid [uuid4])
 #+end_src
@@ -91,14 +91,15 @@ Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given
 * First or Last N Values
 
 #+begin_src hy
-(defn first-last-n [[iterable None] [last False] [number 0]]
+(defn first-last-n [[iterable None] [last False] [number 0] [type- iter]]
       (setv iterable (tuple iterable)
-            first-last-n/len (len iterable))
-      (yield-from (if (and number iterable)
-                      (if last
-                          (cut iterable (- first-last-n/len number) first-last-n/len)
-                          (cut iterable 0 number))
-                      iterable)))
+            first-last-n/len (len iterable)
+            result (if (and number iterable)
+                       (if last
+                           (cut iterable (- first-last-n/len number) (inc first-last-n/len))
+                           (cut iterable 0 (inc number)))
+                       iterable))
+      (return (type- result)))
 #+end_src
 
 * Flatten Iterable
@@ -251,7 +252,7 @@ Remember that ~metaclasses~ use ~cls~ instead of ~self~!
     (setv self.first-task (.add-task self.__class__.Progress f"[green]start" :total 0 :visible False)))
 #+end_src
 
-*** Append richy.progress task to list of progress tasks
+*** Append richyrich.progress task to list of progress tasks
 
 Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/26626707/10827766][here]],
 as well as [[https://stackoverflow.com/users/9567/torsten-marek][Torsten Marek's]] answer [[https://stackoverflow.com/a/328882/10827766][here]]:

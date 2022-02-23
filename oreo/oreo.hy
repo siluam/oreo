@@ -1,5 +1,5 @@
-(import richy.traceback)
-(.install richy.traceback :show-locals True)
+(import richyrich.traceback)
+(.install richyrich.traceback :show-locals True)
 
 (import click)
 (import os)
@@ -8,10 +8,10 @@
 (import autoslot [SlotsMeta])
 (import collections [OrderedDict])
 (import hy [mangle unmangle])
-(import hyrule [coll? dec])
+(import hyrule [coll? dec inc])
 (import importlib.util [spec-from-file-location module-from-spec])
 (import itertools [islice])
-(import richy.progress [Progress])
+(import richyrich.progress [Progress])
 (import time [sleep])
 (import uuid [uuid4])
 
@@ -43,14 +43,15 @@
 
 (defn nots? [string] (not (or (= string ".") (= string ".."))))
 
-(defn first-last-n [[iterable None] [last False] [number 0]]
+(defn first-last-n [[iterable None] [last False] [number 0] [type- iter]]
       (setv iterable (tuple iterable)
-            first-last-n/len (len iterable))
-      (yield-from (if (and number iterable)
-                      (if last
-                          (cut iterable (- first-last-n/len number) first-last-n/len)
-                          (cut iterable 0 number))
-                      iterable)))
+            first-last-n/len (len iterable)
+            result (if (and number iterable)
+                       (if last
+                           (cut iterable (- first-last-n/len number) (inc first-last-n/len))
+                           (cut iterable 0 (inc number)))
+                       iterable))
+      (return (type- result)))
 
 (defn flatten [iterable [times None]]
       (setv lst [])
