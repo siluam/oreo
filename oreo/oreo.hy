@@ -48,8 +48,8 @@
             first-last-n/len (len iterable)
             result (if (and number iterable)
                        (if last
-                           (cut iterable (- first-last-n/len number) (inc first-last-n/len))
-                           (cut iterable 0 (inc number)))
+                           (cut iterable (- first-last-n/len number) first-last-n/len)
+                           (cut iterable 0 number))
                        iterable))
       (return (type- result)))
 
