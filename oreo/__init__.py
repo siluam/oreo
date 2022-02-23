@@ -1,5 +1,5 @@
-import rich.traceback as RichTraceback
-RichTraceback.install(show_locals = True)
+import richy.traceback as RichyTraceback
+RichyTraceback.install(show_locals = True)
 
 import hy
 

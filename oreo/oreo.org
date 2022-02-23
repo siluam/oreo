@@ -1,11 +1,11 @@
 #+setupfile: ../settings/README.org
 #+property: header-args:hy :tangle yes
 
-* Rich Traceback
+* Richy Traceback
 
 #+begin_src hy
-(import rich.traceback)
-(.install rich.traceback :show-locals True)
+(import richy.traceback)
+(.install richy.traceback :show-locals True)
 #+end_src
 
 * Imports
@@ -22,10 +22,12 @@
 (import autoslot [SlotsMeta])
 (import collections [OrderedDict])
 (import hy [mangle unmangle])
-(import hyrule [coll?])
+(import hyrule [coll? dec])
 (import importlib.util [spec-from-file-location module-from-spec])
 (import itertools [islice])
-(import rich.progress [Progress])
+(import richy.progress [Progress])
+(import time [sleep])
+(import uuid [uuid4])
 #+end_src
 
 * Requires
@@ -80,16 +82,22 @@ Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given
                   module)))
 #+end_src
 
-* Trim
+* Not Dots?
 
 #+begin_src hy
-(defn trim [[iterable None] [last False] [number 0]]
+(defn nots? [string] (not (or (= string ".") (= string ".."))))
+#+end_src
+
+* First or Last N Values
+
+#+begin_src hy
+(defn first-last-n [[iterable None] [last False] [number 0]]
       (setv iterable (tuple iterable)
-            trim/len (len iterable))
+            first-last-n/len (len iterable))
       (yield-from (if (and number iterable)
                       (if last
-                          (islice iterable (- trim/len number) trim/len)
-                          (islice iterable 0 number))
+                          (cut iterable (- first-last-n/len number) first-last-n/len)
+                          (cut iterable 0 number))
                       iterable)))
 #+end_src
 
@@ -104,7 +112,7 @@ Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given
                         times))
                (.extend lst (flatten i :times (if times (dec times) times)))
                (.append lst i)))
-      (return lst))
+      (return (if (= times 0) iterable lst)))
 #+end_src
 
 * Recursive Unmangle
@@ -226,21 +234,30 @@ Remember that ~metaclasses~ use ~cls~ instead of ~self~!
 ** __init__
 
 #+begin_src hy
-(defn __init__ [self iterable name color]
+(defn __init__ [self iterable name color [sleep 0.025]]
     (setv self.color color
           self.iterable (tuple iterable)
           self.len (len iterable)
           self.increment (/ 100 self.len)
           self.n 0
           self.name name
+          self.sleep sleep)
 #+end_src
 
-*** Append rich.progress task to list of progress tasks
-
-Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/26626707/10827766][here]], as well as [[https://stackoverflow.com/users/9567/torsten-marek][Torsten Marek's]] answer [[https://stackoverflow.com/a/328882/10827766][here]]:
+*** Append preliminary invisible task to list of progress tasks
 
 #+begin_src hy
-          self.task (.add-task self.__class__.Progress f"[{self.color}]{self.name}" :total self.len))
+(if (= (len self.__class__.Progress.task-ids) 0)
+    (setv self.first-task (.add-task self.__class__.Progress f"[green]start" :total 0 :visible False)))
+#+end_src
+
+*** Append richy.progress task to list of progress tasks
+
+Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/26626707/10827766][here]],
+as well as [[https://stackoverflow.com/users/9567/torsten-marek][Torsten Marek's]] answer [[https://stackoverflow.com/a/328882/10827766][here]]:
+
+#+begin_src hy
+(setv self.task (.add-task self.__class__.Progress f"[{self.color}]{self.name}" :total self.len :start False))
 #+end_src
 
 *** End of __init__
@@ -253,9 +270,12 @@ Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn P
 
 #+begin_src hy
 (defn __iter__ [self]
-    (setv self.n 0)
-    (.start self.__class__.Progress)
-    (return self))
+      (setv self.n 0)
+      (if (= (len self.__class__.Progress.task-ids) 2)
+          (do (.start self.__class__.Progress)
+              (.start-task self.__class__.Progress (get self.__class__.Progress.task-ids 1)))
+          (.start-task self.__class__.Progress self.task))
+      (return self))
 #+end_src
 
 ** __next__
@@ -263,11 +283,14 @@ Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn P
 #+begin_src hy
 (defn __next__ [self]
       (if (< self.n self.len)
-          (try (.update self.__class__.Progress self.task :advance self.increment :refresh True)
+          (try (sleep self.sleep)
+               (.update self.__class__.Progress self.task :advance self.increment :refresh True)
                (return (get self.iterable self.n))
                (finally (+= self.n 1)))
           (try (raise StopIteration)
-               (finally (.stop self.__class__.Progress)))))
+               (finally (.stop-task self.__class__.Progress self.task)
+                        (if self.__class__.Progress.finished
+                            (.stop self.__class__.Progress))))))
 #+end_src
 
 ** End of Eclair
@@ -500,7 +523,7 @@ given that the option ~xor~ is still being parsed by the program.
 
 A play on words between ~ginseng~ tea and ~gen-string~!
 
-~Note:~ To override ~slice~ functionality, refer to [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/16033058/10827766][here]].
+# To override ~slice~ functionality, refer to [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/16033058/10827766][here]].
 
 ** Tea
 
@@ -542,7 +565,7 @@ A play on words between ~ginseng~ tea and ~gen-string~!
           (setv values (tuple (map override-type values))))
       (try (setv first-value (get values 0))
            (except [IndexError] None)
-           (else (return (cond [(isinstance first-value str) (.join delimiter (map str values))]
+           (else (return (cond [(isinstance first-value str) (.strip (.join delimiter (map str values)))]
                                [(isinstance first-value int) (sum (map int values))]
                                [(all (gfor value values (isinstance value (type first-value))))
                                 (do (setv total first-value)
@@ -610,15 +633,20 @@ If the ~summand~ is a collection, pop its first value and merge it with the last
                            last-value)
             summand-is-collection (coll? summand)
             summand-is-dict (isinstance summand dict)
+            summand (if (and summand-is-collection
+                             (not summand-is-dict))
+                        (list summand)
+                        summand)
 #+end_src
 
 Adapted from [[https://stackoverflow.com/users/3218806/maxbellec][maxbellec's]] answer [[https://stackoverflow.com/a/39292086/10827766][here]]:
 
 #+begin_src hy
             summand-first-value (if summand-is-collection
-                                    (.pop summand (if summand-is-dict
-                                                      (next (iter summand))
-                                                      0))
+                                    (.pop summand
+                                          (if summand-is-dict
+                                              (next (iter summand))
+                                              0))
                                     summand)
 #+end_src
 

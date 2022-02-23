@@ -17,13 +17,14 @@ click = "*"
 hy = "^1.0a4"
 hyrule = "*"
 more-itertools = "*"
-rich = { git = "https://github.com/shadowrylander/rich.git", branch = "master" }
+richy = "*"
 toolz = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
 poetry = "*"
 poetry2setup = "*"
+pytest-hylang = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,5 +1,5 @@
-(import rich.traceback)
-(.install rich.traceback :show-locals True)
+(import richy.traceback)
+(.install richy.traceback :show-locals True)
 
 (import click)
 (import os)
@@ -8,10 +8,12 @@
 (import autoslot [SlotsMeta])
 (import collections [OrderedDict])
 (import hy [mangle unmangle])
-(import hyrule [coll?])
+(import hyrule [coll? dec])
 (import importlib.util [spec-from-file-location module-from-spec])
 (import itertools [islice])
-(import rich.progress [Progress])
+(import richy.progress [Progress])
+(import time [sleep])
+(import uuid [uuid4])
 
 (require hyrule [-> assoc])
 
@@ -39,13 +41,15 @@
                   (getattr module attr)
                   module)))
 
-(defn trim [[iterable None] [last False] [number 0]]
+(defn nots? [string] (not (or (= string ".") (= string ".."))))
+
+(defn first-last-n [[iterable None] [last False] [number 0]]
       (setv iterable (tuple iterable)
-            trim/len (len iterable))
+            first-last-n/len (len iterable))
       (yield-from (if (and number iterable)
                       (if last
-                          (islice iterable (- trim/len number) trim/len)
-                          (islice iterable 0 number))
+                          (cut iterable (- first-last-n/len number) first-last-n/len)
+                          (cut iterable 0 number))
                       iterable)))
 
 (defn flatten [iterable [times None]]
@@ -56,7 +60,7 @@
                         times))
                (.extend lst (flatten i :times (if times (dec times) times)))
                (.append lst i)))
-      (return lst))
+      (return (if (= times 0) iterable lst)))
 
 (defn recursive-unmangle [dct]
       (return (D (dfor [key value]
@@ -123,30 +127,40 @@
 
 (defclass eclair [:metaclass meclair]
 
-(defn __init__ [self iterable name color]
+(defn __init__ [self iterable name color [sleep 0.025]]
     (setv self.color color
           self.iterable (tuple iterable)
           self.len (len iterable)
           self.increment (/ 100 self.len)
           self.n 0
           self.name name
+          self.sleep sleep)
 
-self.task (.add-task self.__class__.Progress f"[{self.color}]{self.name}" :total self.len))
+(if (= (len self.__class__.Progress.task-ids) 0)
+    (setv self.first-task (.add-task self.__class__.Progress f"[green]start" :total 0 :visible False)))
+
+(setv self.task (.add-task self.__class__.Progress f"[{self.color}]{self.name}" :total self.len :start False))
 
 )
 
 (defn __iter__ [self]
-    (setv self.n 0)
-    (.start self.__class__.Progress)
-    (return self))
+      (setv self.n 0)
+      (if (= (len self.__class__.Progress.task-ids) 2)
+          (do (.start self.__class__.Progress)
+              (.start-task self.__class__.Progress (get self.__class__.Progress.task-ids 1)))
+          (.start-task self.__class__.Progress self.task))
+      (return self))
 
 (defn __next__ [self]
       (if (< self.n self.len)
-          (try (.update self.__class__.Progress self.task :advance self.increment :refresh True)
+          (try (sleep self.sleep)
+               (.update self.__class__.Progress self.task :advance self.increment :refresh True)
                (return (get self.iterable self.n))
                (finally (+= self.n 1)))
           (try (raise StopIteration)
-               (finally (.stop self.__class__.Progress)))))
+               (finally (.stop-task self.__class__.Progress self.task)
+                        (if self.__class__.Progress.finished
+                            (.stop self.__class__.Progress))))))
 
 )
 
@@ -265,7 +279,7 @@ self.task (.add-task self.__class__.Progress f"[{self.color}]{self.name}" :total
           (setv values (tuple (map override-type values))))
       (try (setv first-value (get values 0))
            (except [IndexError] None)
-           (else (return (cond [(isinstance first-value str) (.join delimiter (map str values))]
+           (else (return (cond [(isinstance first-value str) (.strip (.join delimiter (map str values)))]
                                [(isinstance first-value int) (sum (map int values))]
                                [(all (gfor value values (isinstance value (type first-value))))
                                 (do (setv total first-value)
@@ -303,11 +317,16 @@ self.task (.add-task self.__class__.Progress f"[{self.color}]{self.name}" :total
                            last-value)
             summand-is-collection (coll? summand)
             summand-is-dict (isinstance summand dict)
+            summand (if (and summand-is-collection
+                             (not summand-is-dict))
+                        (list summand)
+                        summand)
 
 summand-first-value (if summand-is-collection
-                        (.pop summand (if summand-is-dict
-                                          (next (iter summand))
-                                          0))
+                        (.pop summand
+                              (if summand-is-dict
+                                  (next (iter summand))
+                                  0))
                         summand)
 
 summand-first-value (if override-type
