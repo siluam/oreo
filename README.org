@@ -1,0 +1,21 @@
+#+setupfile: ./settings/README.org
+
+* The Stuffing for Other Functions!
+** Tea
+:PROPERTIES:
+:ID:       889cec3c-06eb-4993-9afa-6add2e090779
+:CUSTOM_ID:       889cec3c-06eb-4993-9afa-6add2e090779
+:END:
+
+A subclass of [[https://docs.python.org/3/library/collections.html#collections.OrderedDict][OrderedDict]], with a few extra features:
+
+#+begin_src py
+from oreo import tea
+gensing = tea("Hello,", name = "User")
+gensing.glue("!")
+gensing.append("How")
+gensing.extend("are", "you")
+gensing.glue(("?", "I", "feel", "great!"))
+gensing()
+# => Hello, User! How are you? I feel great!
+#+end_src
