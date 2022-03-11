@@ -188,11 +188,12 @@
 
 (defn __init__ [self #* args #** kwargs]
 
-(setv name (cond [(= (len args) 1) (.static/name self.__class__ (get args 0))]
-                 [(= (len args) 2) (if (.startswith (setx pre-name (get args 0)) "--")
+(setv nargs (get args 0)
+      name (cond [(= (len nargs) 1) (.static/name self.__class__ (get nargs 0))]
+                 [(= (len nargs) 2) (if (.startswith (setx pre-name (get nargs 0)) "--")
                                        (.static/name self.__class__ pre-name)
-                                       (.static/name self.__class__ (get args 1)))]
-                 [(= (len args) 3) (get args 3)]))
+                                       (.static/name self.__class__ (get nargs 1)))]
+                 [(= (len nargs) 3) (get nargs 3)]))
 
 (setv help (.get kwargs "help" ""))
 
