@@ -184,7 +184,7 @@
 
 #@(staticmethod (defn da-use? [opt-len] (if (= opt-len 1) "the use" "one or more")))
 
-#@(classmethod (defn static/gen-help [cls help end] (+ help "\nNOTE: This option " end)))
+#@(staticmethod (defn static/gen-help [help end] (+ help "\nNOTE: This option " end)))
 
 (defn __init__ [self #* args #** kwargs]
 
@@ -201,7 +201,7 @@
     (do (setv self.xor-len (len self.xor)
               self.xor-joined (.static/opt-joined self.__class__ self.xor self.xor-len)
               self.xor-help #[f[is mutually exclusive with {(.option? self.__class__ self.xor-len)} {self.xor-joined}.]f])
-        (+= help (.static/gen-help help self.xor-help))))
+        (+= help (.static/gen-help self.__class__ help self.xor-help))))
 
 (setv self.one-req (or (.pop kwargs "one_req" None)
                        (.pop kwargs "one-req" (,))))
@@ -209,7 +209,7 @@
     (do (setv self.one-req-len (len self.one-req)
               self.one-req-joined (.static/opt-joined self.__class__ self.one-req self.one-req-len)
               self.one-req-help #[f[must be used if {(.option? self.__class__ self.one-req-len)} {self.one-req-joined} {(.is? self.__class__ self.one-req-len)} not.]f])
-        (+= help (.static/gen-help help self.one-req-help))))
+        (+= help (.static/gen-help self.__class__ help self.one-req-help))))
 
 (setv self.req-one-of (or (.pop kwargs "req_one_of" None)
                           (.pop kwargs "req-one-of" (,))))
@@ -217,7 +217,7 @@
     (do (setv self.req-one-of-len (len self.req-one-of)
               self.req-one-of-joined (.static/opt-joined self.__class__ self.req-one-of self.req-one-of-len)
               self.req-one-of-help #[f[requires {(.da-use? self.__class__ self.req-one-of-len)} of {(.option? self.__class__ self.req-one-of-len)} {self.req-one-of-joined} as well.]f])
-        (+= help (.static/gen-help help self.req-one-of-help))))
+        (+= help (.static/gen-help self.__class__ help self.req-one-of-help))))
 
 (setv self.req-all-of (or (.pop kwargs "req_all_of" None)
                           (.pop kwargs "req-all-of" (,))))
@@ -225,7 +225,7 @@
     (do (setv self.req-all-of-len (len self.req-all-of)
               self.req-all-of-joined (.static/opt-joined self.__class__ self.req-all-of self.req-all-of-len)
               self.req-all-of-help #[f[requires {(.option? self.__class__ self.req-all-of-len)} {self.req-all-of-joined} as well.]f])
-        (+= help (.static/gen-help help ))))
+        (+= help (.static/gen-help self.__class__ help self.req-all-of-help))))
 
 (.update kwargs { "help" help })
 
