@@ -240,9 +240,9 @@
          (any (gfor opt self.xor (in opt opts))))
     (raise (click.UsageError f"Sorry; {self.name} {self.xor-help}")))
 
-(unless (and (not self.one-req)
-             (in self.name opts)
-             (any (gfor opt self.one-req (in opt opts))))
+(unless (or (not self.one-req)
+            (in self.name opts)
+            (any (gfor opt self.one-req (in opt opts))))
     (raise (click.UsageError (+ "Sorry! "
                                 (if (= self.one-req-len 1) "One of " "")
                                 self.one-req-joined
