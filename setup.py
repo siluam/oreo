@@ -14,7 +14,7 @@ install_requires = \
  'hy>=1.0a4,<2.0',
  'hyrule',
  'more-itertools',
- 'richyrich',
+ 'rich',
  'toolz']
 
 setup_kwargs = {

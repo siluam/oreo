@@ -2,11 +2,11 @@
 #+property: header-args:hy :tangle yes
 
 * Preparations
-** Richyrich Traceback
+** Rich Traceback
 
 #+begin_src hy
-(import richyrich.traceback)
-(.install richyrich.traceback)
+(import rich.traceback)
+(.install rich.traceback)
 #+end_src
 
 ** Imports

@@ -1,5 +1,5 @@
-(import richyrich.traceback)
-(.install richyrich.traceback :show-locals True)
+(import rich.traceback)
+(.install rich.traceback :show-locals True)
 
 (import click)
 (import os)
@@ -11,7 +11,7 @@
 (import hyrule [coll? dec inc])
 (import importlib.util [spec-from-file-location module-from-spec])
 (import itertools [islice])
-(import richyrich.progress [Progress])
+(import rich.progress [Progress])
 (import time [sleep])
 (import uuid [uuid4])
 

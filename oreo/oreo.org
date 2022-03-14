@@ -1,11 +1,11 @@
 #+setupfile: ../settings/README.org
 #+property: header-args:hy :tangle yes
 
-* Richyrich Traceback
+* Rich Traceback
 
 #+begin_src hy
-(import richyrich.traceback)
-(.install richyrich.traceback :show-locals True)
+(import rich.traceback)
+(.install rich.traceback :show-locals True)
 #+end_src
 
 * Imports
@@ -25,7 +25,7 @@
 (import hyrule [coll? dec inc])
 (import importlib.util [spec-from-file-location module-from-spec])
 (import itertools [islice])
-(import richyrich.progress [Progress])
+(import rich.progress [Progress])
 (import time [sleep])
 (import uuid [uuid4])
 #+end_src
@@ -252,7 +252,7 @@ Remember that ~metaclasses~ use ~cls~ instead of ~self~!
     (setv self.first-task (.add-task self.__class__.Progress f"[green]start" :total 0 :visible False)))
 #+end_src
 
-*** Append richyrich.progress task to list of progress tasks
+*** Append rich.progress task to list of progress tasks
 
 Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/26626707/10827766][here]],
 as well as [[https://stackoverflow.com/users/9567/torsten-marek][Torsten Marek's]] answer [[https://stackoverflow.com/a/328882/10827766][here]]:

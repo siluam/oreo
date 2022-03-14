@@ -1,5 +1,5 @@
-(import richyrich.traceback)
-(.install richyrich.traceback)
+(import rich.traceback)
+(.install rich.traceback)
 
 (import oreo [eclair])
 (import os [path :as osPath])
