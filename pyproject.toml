@@ -16,6 +16,7 @@ autoslot = "*"
 click = "*"
 hy = "^1.0a4"
 hyrule = "*"
+nixpkgs = "*"
 more-itertools = "*"
 rich = { git = "https://github.com/syvlorg/rich.git", branch = "master" }
 toolz = "*"
