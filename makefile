@@ -7,9 +7,9 @@ mkfileDir := $(dir $(mkfilePath))
 
 tangle:
 |make -f $(mkfileDir)/settings/makefile tangle-setup
-|$(mkfileDir)/settings/org-tangle.sh $(mkfileDir)/oreo/*.org
-|$(mkfileDir)/settings/org-tangle.sh $(mkfileDir)/tests.org
-|$(mkfileDir)/settings/org-tangle.sh $(mkfileDir)/shell.org
+|$(mkfileDir)/settings/bin/org-tangle $(mkfileDir)/oreo/*.org
+|$(mkfileDir)/settings/bin/org-tangle $(mkfileDir)/tests.org
+|$(mkfileDir)/settings/bin/org-tangle $(mkfileDir)/shell.org
 
 install: tangle
 |pip install .
