@@ -1,6 +1,6 @@
 # class nanite_opString(click.Option):
 #     """
-# 		Credits for MutuallyExclusiveOption: https://gist.github.com/jacobtolar/fb80d5552a9a9dfc32b12a829fa21c0c
+# 		Credits for MutuallyExclusiveOption: https://gist.github.com/shadowrylander/683a20d73a10c181d312eb6ff632e60d
 #
 # 		Credits for GroupedOptions: https://stackoverflow.com/questions/55874075/use-several-options-together-or-not-at-all/55881912#55881912
 # 		Answer By: https://stackoverflow.com/users/7311767/stephen-rauch

@@ -21,8 +21,12 @@
 (import addict [Dict :as D])
 (import autoslot [SlotsMeta])
 (import collections [OrderedDict])
+(import collections.abc [Iterable])
 (import hy [mangle unmangle])
-(import hyrule [coll? dec inc])
+
+;; TODO
+#_(import hyrule [coll? dec])
+
 (import importlib.util [spec-from-file-location module-from-spec])
 (import itertools [islice])
 (import rich.progress [Progress])
@@ -32,8 +36,8 @@
 
 * Requires
 
-#+begin_src hy
-(require hyrule [-> assoc unless])
+#+begin_src hy :tangle no
+(require hyrule [-> assoc])
 #+end_src
 
 *** Coconut
@@ -55,17 +59,62 @@
              (import toolz [first])))
 #+end_src
 
+* Either Instance
+
+Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/27475071/10827766][here]];
+for more information, check out [[https://stackoverflow.com/users/179805/fletom][fletom's]] answer [[https://stackoverflow.com/a/17246726/10827766][here]],
+and [[https://stackoverflow.com/users/210945/naught101][naught101's]] comment [[https://stackoverflow.com/questions/2611892/how-to-get-the-parents-of-a-python-class#comment70569175_2611939][here]]:
+
+#+begin_src hy
+(defn either? [first-type second-type #* args]
+      (setv args (, first-type second-type #* args))
+      (defn inner [cls]
+            (return (if (hasattr cls "__mro__")
+                        (gfor m cls.__mro__ :if (!= m object) m)
+                        (, cls))))
+      (any (gfor [i a]
+                 (enumerate args)
+                 :setv typle (tuple (flatten (gfor [j b]
+                                                   (enumerate args)
+                                                   :if (!= i j)
+                                                   (inner (cond [(isinstance b ModuleCaller) (b)]
+                                                                [(isinstance b type) b]
+                                                                [True (type b)])))))
+                 (cond [(isinstance a ModuleCaller) (issubclass (a) typle)]
+                       [(isinstance a type) (issubclass a typle)]
+                       [True (or (issubclass (type a) typle)
+                                 (isinstance a typle))]))))
+#+end_src
+
+* Collection
+
+#+begin_src hy
+(defn coll? [coll]
+      (return (if (isinstance coll (, str bytes bytearray))
+                  False
+                  (try (iter coll)
+                   (except [TypeError]
+                           (isinstance coll Iterable))
+                   (else True)))))
+#+end_src
+
 * Module Installed
 
 Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given-the-full-path/#:~:text=Inside%20explicit%20method-,Using%20importlib%20Package,-The%20importlib%20package][here]]
 
 #+begin_src hy
 (defn module-installed [path]
-      (setv spec (-> os.path
+
+      ;; TODO
+      #_(setv spec (-> os.path
                      (.basename path)
                      (.split ".")
                      (get 0)
                      (spec-from-file-location path)))
+
+      ;; TODO
+      (setv spec (spec-from-file-location (get (.split (.basename os.path path) ".") 0) path))
+
       (if spec
           (do (setv module (module-from-spec spec))
               (.exec-module spec.loader module)
@@ -111,7 +160,13 @@ Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given
            (if (and (coll? i)
                     (or (is times None)
                         times))
-               (.extend lst (flatten i :times (if times (dec times) times)))
+
+               ;; TODO
+               #_(.extend lst (flatten i :times (if times (dec times) times)))
+               
+               ;; TODO
+               (.extend lst (flatten i :times (if times (- times 1) times)))
+
                (.append lst i)))
       (return (if (= times 0) iterable lst)))
 #+end_src
@@ -181,33 +236,6 @@ Adapted from [[https://stackoverflow.com/users/11769765/friedrich][Friedrich's]]
 
 #+begin_src hy
 (defn int? [value] (return (and (isinstance value int) (not (isinstance value bool)))))
-#+end_src
-
-* Either Instance
-
-Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/27475071/10827766][here]];
-for more information, check out [[https://stackoverflow.com/users/179805/fletom][fletom's]] answer [[https://stackoverflow.com/a/17246726/10827766][here]],
-and [[https://stackoverflow.com/users/210945/naught101][naught101's]] comment [[https://stackoverflow.com/questions/2611892/how-to-get-the-parents-of-a-python-class#comment70569175_2611939][here]]:
-
-#+begin_src hy
-(defn either? [first-type second-type #* args]
-      (setv args (, first-type second-type #* args))
-      (defn inner [cls]
-            (return (if (hasattr cls "__mro__")
-                        (gfor m cls.__mro__ :if (!= m object) m)
-                        (, cls))))
-      (any (gfor [i a]
-                 (enumerate args)
-                 :setv typle (tuple (flatten (gfor [j b]
-                                                   (enumerate args)
-                                                   :if (!= i j)
-                                                   (inner (cond [(isinstance b ModuleCaller) (b)]
-                                                                [(isinstance b type) b]
-                                                                [True (type b)])))))
-                 (cond [(isinstance a ModuleCaller) (issubclass (a) typle)]
-                       [(isinstance a type) (issubclass a typle)]
-                       [True (or (issubclass (type a) typle)
-                                 (isinstance a typle))]))))
 #+end_src
 
 * The Meclair Class
@@ -314,10 +342,15 @@ All options are adapted from [[https://stackoverflow.com/users/7311767/stephen-r
 
 #+begin_src hy
 #@(staticmethod (defn static/name [name]
-                      (-> name
+                      
+                      ;; TODO
+                      #_(-> name
                           (remove-prefix-n "-" :n 2)
                           (.replace "-" "_")
-                          (.lower))))
+                          (.lower))
+
+                      ;; TODO
+                      (.lower (.replace (remove-prefix-n name "-" :n 2) "-" "_"))))
 #+end_src
 
 **** Joined Options
@@ -475,10 +508,10 @@ given that the option ~xor~ is still being parsed by the program.
 
 ***** One Required
 
-#+begin_src hy
-(unless (or (not self.one-req)
-            (in self.name opts)
-            (any (gfor opt self.one-req (in opt opts))))
+#+begin_src hy :tangle no
+(if (and self.one-req
+         (not (in self.name opts))
+         (not (any (gfor opt self.one-req (in opt opts)))))
     (raise (click.UsageError (+ "Sorry! "
                                 (if (= self.one-req-len 1) "One of " "")
                                 self.one-req-joined
@@ -604,7 +637,13 @@ A play on words between ~ginseng~ tea and ~gen-string~!
 *** Append
 
 #+begin_src hy
-(defn append [self summand [key None]] (assoc self (or key (.get-next-free-index self)) summand))
+(defn append [self summand [key None]]
+
+             ;; TODO
+             #_(assoc self (or key (.get-next-free-index self)) summand)
+
+             ;; TODO
+             (setv (. self [(or key (.get-next-free-index self))]) summand))
 #+end_src
 
 *** Shifted
@@ -659,7 +698,13 @@ Adapted from [[https://stackoverflow.com/users/3218806/maxbellec][maxbellec's]] 
             summand-first-value (if (either? last-value summand-first-value)
                                     summand-first-value
                                     (raise (TypeError "Sorry! The last value of this tea and first value of the provided collection must be of the same type!"))))
-      (assoc self last-key (+ last-value summand-first-value))
+      
+      ;; TODO
+      #_(assoc self last-key (+ last-value summand-first-value))
+
+      ;; TODO
+      (setv (. self [last-key]) (+ last-value summand-first-value))
+
       (if summand-is-collection
           (.update self (if summand-is-dict
                             summand
@@ -673,7 +718,14 @@ Adapted from [[https://stackoverflow.com/users/3218806/maxbellec][maxbellec's]] 
       (setv scopy (deepcopy self))
       (cond [(isinstance summand dict) (.update scopy summand)]
             [(coll? summand) (.update scopy (.shifted scopy #* summand))]
-            [True (assoc scopy (.get-next-free-index scopy) summand)])
+            
+            ;; TODO
+            #_[True (assoc scopy (.get-next-free-index scopy) summand)]
+
+            ;; TODO
+            [True (setv (. scopy [(.get-next-free-index scopy)]) summand)]
+
+            )
       (return scopy))
 #+end_src
 

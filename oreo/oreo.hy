@@ -7,15 +7,17 @@
 (import addict [Dict :as D])
 (import autoslot [SlotsMeta])
 (import collections [OrderedDict])
+(import collections.abc [Iterable])
 (import hy [mangle unmangle])
-(import hyrule [coll? dec inc])
+
+;; TODO
+#_(import hyrule [coll? dec])
+
 (import importlib.util [spec-from-file-location module-from-spec])
 (import itertools [islice])
 (import rich.progress [Progress])
 (import time [sleep])
 (import uuid [uuid4])
-
-(require hyrule [-> assoc unless])
 
 (try (import coconut *)
      (except [ImportError] None))
@@ -24,12 +26,45 @@
      (except [ImportError]
              (import toolz [first])))
 
+(defn either? [first-type second-type #* args]
+      (setv args (, first-type second-type #* args))
+      (defn inner [cls]
+            (return (if (hasattr cls "__mro__")
+                        (gfor m cls.__mro__ :if (!= m object) m)
+                        (, cls))))
+      (any (gfor [i a]
+                 (enumerate args)
+                 :setv typle (tuple (flatten (gfor [j b]
+                                                   (enumerate args)
+                                                   :if (!= i j)
+                                                   (inner (cond [(isinstance b ModuleCaller) (b)]
+                                                                [(isinstance b type) b]
+                                                                [True (type b)])))))
+                 (cond [(isinstance a ModuleCaller) (issubclass (a) typle)]
+                       [(isinstance a type) (issubclass a typle)]
+                       [True (or (issubclass (type a) typle)
+                                 (isinstance a typle))]))))
+
+(defn coll? [coll]
+      (return (if (isinstance coll (, str bytes bytearray))
+                  False
+                  (try (iter coll)
+                   (except [TypeError]
+                           (isinstance coll Iterable))
+                   (else True)))))
+
 (defn module-installed [path]
-      (setv spec (-> os.path
+
+      ;; TODO
+      #_(setv spec (-> os.path
                      (.basename path)
                      (.split ".")
                      (get 0)
                      (spec-from-file-location path)))
+
+      ;; TODO
+      (setv spec (spec-from-file-location (get (.split (.basename os.path path) ".") 0) path))
+
       (if spec
           (do (setv module (module-from-spec spec))
               (.exec-module spec.loader module)
@@ -59,7 +94,13 @@
            (if (and (coll? i)
                     (or (is times None)
                         times))
-               (.extend lst (flatten i :times (if times (dec times) times)))
+
+               ;; TODO
+               #_(.extend lst (flatten i :times (if times (dec times) times)))
+               
+               ;; TODO
+               (.extend lst (flatten i :times (if times (- times 1) times)))
+
                (.append lst i)))
       (return (if (= times 0) iterable lst)))
 
@@ -102,25 +143,6 @@
 (defclass ModuleCaller)
 
 (defn int? [value] (return (and (isinstance value int) (not (isinstance value bool)))))
-
-(defn either? [first-type second-type #* args]
-      (setv args (, first-type second-type #* args))
-      (defn inner [cls]
-            (return (if (hasattr cls "__mro__")
-                        (gfor m cls.__mro__ :if (!= m object) m)
-                        (, cls))))
-      (any (gfor [i a]
-                 (enumerate args)
-                 :setv typle (tuple (flatten (gfor [j b]
-                                                   (enumerate args)
-                                                   :if (!= i j)
-                                                   (inner (cond [(isinstance b ModuleCaller) (b)]
-                                                                [(isinstance b type) b]
-                                                                [True (type b)])))))
-                 (cond [(isinstance a ModuleCaller) (issubclass (a) typle)]
-                       [(isinstance a type) (issubclass a typle)]
-                       [True (or (issubclass (type a) typle)
-                                 (isinstance a typle))]))))
 
 (defclass meclair [SlotsMeta]
 
@@ -168,10 +190,15 @@
 (defclass Option [click.Option]
 
 #@(staticmethod (defn static/name [name]
-                      (-> name
+                      
+                      ;; TODO
+                      #_(-> name
                           (remove-prefix-n "-" :n 2)
                           (.replace "-" "_")
-                          (.lower))))
+                          (.lower))
+
+                      ;; TODO
+                      (.lower (.replace (remove-prefix-n name "-" :n 2) "-" "_"))))
 
 #@(staticmethod (defn static/opt-joined [opt-val opt-len]
                       (if (= opt-len 1)
@@ -240,14 +267,6 @@
          (any (gfor opt self.xor (in opt opts))))
     (raise (click.UsageError f"Sorry; {self.name} {self.xor-help}")))
 
-(unless (or (not self.one-req)
-            (in self.name opts)
-            (any (gfor opt self.one-req (in opt opts))))
-    (raise (click.UsageError (+ "Sorry! "
-                                (if (= self.one-req-len 1) "One of " "")
-                                self.one-req-joined
-                                " is required."))))
-
 (if (and (in self.name opts)
          self.req-one-of
          (not (any (gfor opt self.req-one-of (in opt opts)))))
@@ -302,7 +321,13 @@
                  (+= current-len 1)))
       (return current-len))
 
-(defn append [self summand [key None]] (assoc self (or key (.get-next-free-index self)) summand))
+(defn append [self summand [key None]]
+
+             ;; TODO
+             #_(assoc self (or key (.get-next-free-index self)) summand)
+
+             ;; TODO
+             (setv (. self [(or key (.get-next-free-index self))]) summand))
 
 (defn shifted [self #* args]
       (setv shift (.get-next-free-index self))
@@ -337,7 +362,13 @@ summand-first-value (if override-type
       summand-first-value (if (either? last-value summand-first-value)
                               summand-first-value
                               (raise (TypeError "Sorry! The last value of this tea and first value of the provided collection must be of the same type!"))))
-(assoc self last-key (+ last-value summand-first-value))
+
+;; TODO
+#_(assoc self last-key (+ last-value summand-first-value))
+
+;; TODO
+(setv (. self [last-key]) (+ last-value summand-first-value))
+
 (if summand-is-collection
     (.update self (if summand-is-dict
                       summand
@@ -347,7 +378,14 @@ summand-first-value (if override-type
       (setv scopy (deepcopy self))
       (cond [(isinstance summand dict) (.update scopy summand)]
             [(coll? summand) (.update scopy (.shifted scopy #* summand))]
-            [True (assoc scopy (.get-next-free-index scopy) summand)])
+            
+            ;; TODO
+            #_[True (assoc scopy (.get-next-free-index scopy) summand)]
+
+            ;; TODO
+            [True (setv (. scopy [(.get-next-free-index scopy)]) summand)]
+
+            )
       (return scopy))
 
 (defn __sub__ [self subtrahend]
