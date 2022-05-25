@@ -225,34 +225,34 @@
 (setv help (.get kwargs "help" ""))
 
 (if (setx self.xor (.pop kwargs "xor" (,)))
-    (do (setv self.xor-len (len self.xor)
-              self.xor-joined (.static/opt-joined self.__class__ name self.xor self.xor-len)
-              self.xor-help #[f[is mutually exclusive with {(.option? self.__class__ self.xor-len)} {self.xor-joined}.]f])
-        (+= help (.static/gen-help self.__class__ help self.xor-help))))
+    (setv self.xor-len (len self.xor)
+          self.xor-joined (.static/opt-joined self.__class__ name self.xor self.xor-len)
+          self.xor-help #[f[is mutually exclusive with {(.option? self.__class__ self.xor-len)} {self.xor-joined}.]f]
+          help (.static/gen-help self.__class__ help self.xor-help)))
 
 (setv self.one-req (or (.pop kwargs "one_req" None)
                        (.pop kwargs "one-req" (,))))
 (if self.one-req
-    (do (setv self.one-req-len (len self.one-req)
-              self.one-req-joined (.static/opt-joined self.__class__ name self.one-req self.one-req-len)
-              self.one-req-help #[f[must be used if {(.option? self.__class__ self.one-req-len)} {self.one-req-joined} {(.is? self.__class__ self.one-req-len)} not.]f])
-        (+= help (.static/gen-help self.__class__ help self.one-req-help))))
+    (setv self.one-req-len (len self.one-req)
+          self.one-req-joined (.static/opt-joined self.__class__ name self.one-req self.one-req-len)
+          self.one-req-help #[f[must be used if {(.option? self.__class__ self.one-req-len)} {self.one-req-joined} {(.is? self.__class__ self.one-req-len)} not.]f]
+          help (.static/gen-help self.__class__ help self.one-req-help)))
 
 (setv self.req-one-of (or (.pop kwargs "req_one_of" None)
                           (.pop kwargs "req-one-of" (,))))
 (if self.req-one-of
-    (do (setv self.req-one-of-len (len self.req-one-of)
-              self.req-one-of-joined (.static/opt-joined self.__class__ name self.req-one-of self.req-one-of-len)
-              self.req-one-of-help #[f[requires {(.da-use? self.__class__ self.req-one-of-len)} of {(.option? self.__class__ self.req-one-of-len)} {self.req-one-of-joined} as well.]f])
-        (+= help (.static/gen-help self.__class__ help self.req-one-of-help))))
+    (setv self.req-one-of-len (len self.req-one-of)
+          self.req-one-of-joined (.static/opt-joined self.__class__ name self.req-one-of self.req-one-of-len)
+          self.req-one-of-help #[f[requires {(.da-use? self.__class__ self.req-one-of-len)} of {(.option? self.__class__ self.req-one-of-len)} {self.req-one-of-joined} as well.]f]
+          help (.static/gen-help self.__class__ help self.req-one-of-help)))
 
 (setv self.req-all-of (or (.pop kwargs "req_all_of" None)
                           (.pop kwargs "req-all-of" (,))))
 (if self.req-all-of
-    (do (setv self.req-all-of-len (len self.req-all-of)
-              self.req-all-of-joined (.static/opt-joined self.__class__ name self.req-all-of self.req-all-of-len)
-              self.req-all-of-help #[f[requires {(.option? self.__class__ self.req-all-of-len)} {self.req-all-of-joined} as well.]f])
-        (+= help (.static/gen-help self.__class__ help self.req-all-of-help))))
+    (setv self.req-all-of-len (len self.req-all-of)
+          self.req-all-of-joined (.static/opt-joined self.__class__ name self.req-all-of self.req-all-of-len)
+          self.req-all-of-help #[f[requires {(.option? self.__class__ self.req-all-of-len)} {self.req-all-of-joined} as well.]f]
+          help (.static/gen-help self.__class__ help self.req-all-of-help)))
 
 (.update kwargs { "help" help })
 
