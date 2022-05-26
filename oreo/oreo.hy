@@ -104,6 +104,14 @@
                (.append lst i)))
       (return (if (= times 0) iterable lst)))
 
+(defn multipart [string delimiter [all-parts None]]
+      (setv all-parts (or all-parts []))
+      (for [part (.partition string delimiter)]
+           (if (and (in delimiter part) (!= delimiter part))
+               (setv all-parts (multipart part delimiter :all-parts all-parts))
+               (.append all-parts part)))
+      (return (filter None all-parts)))
+
 (defn recursive-unmangle [dct]
       (return (D (dfor [key value]
                        (.items dct)

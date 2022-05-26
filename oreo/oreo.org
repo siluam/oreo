@@ -171,6 +171,18 @@ Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given
       (return (if (= times 0) iterable lst)))
 #+end_src
 
+* Multiple Partitions
+
+#+begin_src hy
+(defn multipart [string delimiter [all-parts None]]
+      (setv all-parts (or all-parts []))
+      (for [part (.partition string delimiter)]
+           (if (and (in delimiter part) (!= delimiter part))
+               (setv all-parts (multipart part delimiter :all-parts all-parts))
+               (.append all-parts part)))
+      (return (filter None all-parts)))
+#+end_src
+
 * Recursive Unmangle
 
 #+begin_src hy
