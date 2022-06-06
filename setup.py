@@ -14,7 +14,8 @@ install_requires = \
  'hy>=1.0a4,<2.0',
  'hyrule',
  'more-itertools',
- 'rich',
+ 'nixpkgs',
+ 'rich @ git+https://github.com/syvlorg/rich.git@master',
  'toolz']
 
 setup_kwargs = {
@@ -30,7 +31,7 @@ setup_kwargs = {
     'packages': packages,
     'package_data': package_data,
     'install_requires': install_requires,
-    'python_requires': '>=3.9,<3.11',
+    'python_requires': '>=3.9,<4.0',
 }
 
 
