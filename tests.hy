@@ -42,11 +42,17 @@
 
 (defn [zoom] a54f24d7-4620-4834-b996-04af2973926f []
               (import oreo [flatten])
+              (assert (= (flatten 1) [1]))
               (setv nested #(1 #(2 #(3 #(4)))))
               (assert (= (flatten nested) [1 2 3 4]))
               (assert (= (flatten nested :times 0) nested))
               (assert (= (flatten nested :times 1) [1 2 #(3 #(4))]))
               (assert (= (flatten nested :times 2) [1 2 3 #(4)]))
-              (assert (= (flatten nested :times 3) [1 2 3 4])))
+              (assert (= (flatten nested :times 3) [1 2 3 4]))
+              (assert (= (flatten #* nested) [1 2 3 4]))
+              (assert (= (flatten #* nested :times 0) nested))
+              (assert (= (flatten #* nested :times 1) [1 2 #(3 #(4))]))
+              (assert (= (flatten #* nested :times 2) [1 2 3 #(4)]))
+              (assert (= (flatten #* nested :times 3) [1 2 3 4])))
 
 (for [func (eclair funcs "tests" "blue")] (func))

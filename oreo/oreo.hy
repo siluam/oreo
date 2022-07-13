@@ -9,7 +9,7 @@
 (import collections [OrderedDict])
 (import collections.abc [Iterable])
 (import hy [mangle unmangle])
-(import hyrule [coll? dec])
+(import hyrule [dec])
 (import importlib.util [spec-from-file-location module-from-spec])
 (import itertools [islice])
 (import rich [print])
@@ -55,9 +55,9 @@
       (return (if (isinstance coll #(str bytes bytearray))
                   False
                   (try (iter coll)
-                   (except [TypeError]
-                           (isinstance coll Iterable))
-                   (else True)))))
+                       (except [TypeError]
+                               (isinstance coll Iterable))
+                       (else True)))))
 
 (defn module-installed [path]
       (setv spec (-> os.path
@@ -88,7 +88,15 @@
                        iterable))
       (return (type- result)))
 
-(defn flatten [iterable [times None]]
+(defn flatten [#* iterable [times None]]
+      (if (= (len iterable) 1)
+          (do (setv first (get iterable 0))
+              (if (= times 0)
+                  (return first)
+                  (setv iterable (if (coll? first)
+                                     first
+                                     iterable))))
+          (when (= times 0) (return iterable)))
       (setv lst [])
       (for [i iterable]
            (if (and (coll? i)
@@ -96,7 +104,7 @@
                         times))
                (.extend lst (flatten i :times (if times (dec times) times)))
                (.append lst i)))
-      (return (if (= times 0) iterable lst)))
+      (return lst))
 
 (defn multipart [string delimiter [all-parts None]]
       (setv all-parts (or all-parts []))
