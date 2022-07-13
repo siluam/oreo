@@ -11,7 +11,7 @@ install_requires = \
 ['addict',
  'autoslot',
  'click',
- 'hy>=1.0a4,<2.0',
+ 'hy>=0.24.0,<0.25.0',
  'hyrule',
  'more-itertools',
  'nixpkgs',
@@ -21,7 +21,7 @@ install_requires = \
 setup_kwargs = {
     'name': 'oreo',
     'version': '1.0.0.0',
-    'description': 'A bunch of useful funtions',
+    'description': 'The Stuffing for Other Functions!',
     'long_description': None,
     'author': 'sylvorg',
     'author_email': 'jeet.ray@syvl.org',

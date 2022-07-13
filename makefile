@@ -1,23 +1,19 @@
 .RECIPEPREFIX := |
 .DEFAULT_GOAL := test
-
-# Adapted From: https://www.systutorials.com/how-to-get-the-full-path-and-directory-of-a-makefile-itself/
+export PATH := $(shell nix-shell -E '(import ./.).devShells.$${builtins.currentSystem}.makefile' --show-trace)
 mkfilePath := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfileDir := $(dir $(mkfilePath))
-
 tangle:
-|make -f $(mkfileDir)/settings/makefile tangle-setup
-|$(mkfileDir)/settings/bin/org-tangle $(mkfileDir)/oreo/*.org
-|$(mkfileDir)/settings/bin/org-tangle $(mkfileDir)/tests.org
-|$(mkfileDir)/settings/bin/org-tangle $(mkfileDir)/shell.org
-
-install: tangle
-|pip install .
-
-repl:
-|hy
-
-replit: tangle install repl
+|org-tangle $(mkfileDir)/$$(cat $(mkfileDir)/pyproject.toml | tomlq .tool.poetry.name | tr -d '"') $(mkfileDir)/tests.org $(mkfileDir)/nix.org
 
 test: tangle
 |hy $(mkfileDir)/tests.hy
+
+poetry2setup:
+|poetry2setup > $(mkfileDir)/setup.py
+
+commit:
+|git -C $(mkfileDir) commit --allow-empty-message -am ""
+
+push: commit
+|git -C $(mkfileDir) push

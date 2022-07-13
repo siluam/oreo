@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "oreo"
 version = "1.0.0.0"
-description = "A bunch of useful funtions"
+description = "The Stuffing for Other Functions!"
 authors = ["sylvorg <jeet.ray@syvl.org>"]
 license = "OREO"
 include = [
@@ -14,7 +14,7 @@ python = "^3.9"
 addict = "*"
 autoslot = "*"
 click = "*"
-hy = "^1.0a4"
+hy = "^0.24.0"
 hyrule = "*"
 nixpkgs = "*"
 more-itertools = "*"

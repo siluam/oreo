@@ -1,4 +1,3 @@
-#+setupfile: ../settings/README.org
 #+property: header-args:py :tangle yes
 
 * Rich Traceback
