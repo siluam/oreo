@@ -32,7 +32,7 @@
             , pname
         }: let owner = "syvlorg"; in buildPythonPackage rec {
             inherit pname;
-            inherit ((fromTOML (readFile "${src}/pyproject.toml")).tool.poetry) version;
+            version = j.pyVersion format src;
             format = "pyproject";
             disabled = pythonOlder "3.9";
             src = ./.;
