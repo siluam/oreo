@@ -29,7 +29,8 @@
             url = github:sylvorg/settings;
             inputs.pypkg-oreo.follows = "";
         };
-        nixpkgs.follows = "settings/nixpkgs";
+        # nixpkgs.follows = "settings/nixpkgs";
+        nixpkgs.url = github:nixos/nixpkgs/<<channel(dotted='t)>>;
         flake-utils.url = github:numtide/flake-utils;
         flake-compat = {
             url = "github:edolstra/flake-compat";
