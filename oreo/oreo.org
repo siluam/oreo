@@ -1,4 +1,4 @@
-#+property: header-args:hy :tangle yes
+#+property: header-args:hy+ :tangle yes
 
 * Rich Traceback
 

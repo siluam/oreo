@@ -1,99 +1,77 @@
-#+property: header-args:hy :tangle yes
+#+property: header-args:hy+ :tangle (meq/tangle-path)
 
-* Preparations
-** Rich Traceback
-
-#+begin_src hy
-(import rich.traceback)
-(.install rich.traceback)
-#+end_src
-
-** Imports
-*** From
+* tests
+** test-eclair.hy
 
 #+begin_src hy
 (import oreo [eclair])
-(import os [path :as osPath])
+(defn test-eclair [] (for [i (eclair (range 100) "69611341-cf92-48bb-8cda-79c7fe28d9f2" "red")]))
 #+end_src
 
-** Zoom Decorator
+** test-gensing.hy
 
 #+begin_src hy
-(setv funcs [])
-(defn zoom [func] (.append funcs func))
+(import oreo [tea])
+(setv test (tea :a "b" :c "d"))
+(defn test-gensing []
+      (.append test "f")
+      (.extend test "h" "j" "l")
+      (.glue test "mnop")
+      (.glue test (tea :q "r" :s "t"))
+      (.glue test ["v" "x"])
+      (assert (test) "b d f h j lmnopr tv x"))
 #+end_src
 
-* Tests
-** Eclair
+** test-either?.hy
 
 #+begin_src hy
-(defn [zoom] 69611341-cf92-48bb-8cda-79c7fe28d9f2 []
-      (import oreo [eclair])
-      (for [i (eclair (range 100) "69611341-cf92-48bb-8cda-79c7fe28d9f2" "red")]))
+(import oreo [either?])
+(import collections [OrderedDict])
+(import addict [Dict])
+
+(defn test-either-OrderedDict-dict [] (assert (either? OrderedDict dict)))
+(defn test-either-OrderedDict-Dict [] (assert (either? OrderedDict Dict)))
+(defn test-either-Dict-dict [] (assert (either? Dict dict)))
+
+(defn test-either-Dict-not-string [] (assert (= (either? "Dict" Dict) False)))
+
+(defn test-either-isinstance-string [] (assert (either? "Dict" str)))
+
+(defn test-either-none-of [] (assert (= (either? "Dict" Dict list) False)))
+
+(defn test-either-one-of [] (assert (either? "OrderedDict" "Dict" list)))
+
+(defn test-either-instances [] (assert (either? "OrderedDict" "Dict")))
 #+end_src
 
-** Gensing
+** test-first-last-n.hy
 
 #+begin_src hy
-(defn [zoom] 9a62edb0-a552-4283-914a-b4731968b1e4 []
-              (import oreo [tea])
-              (setv test (tea :a "b" :c "d"))
-              (.append test "f")
-              (.extend test "h" "j" "l")
-              (.glue test "mnop")
-              (.glue test (tea :q "r" :s "t"))
-              (.glue test ["v" "x"])
-              (assert (test) "b d f h j lmnopr tv x"))
+(import oreo [first-last-n])
+(setv ten (range 10))
+
+(defn test-first-5 [] (assert (all (gfor i (range 5) (in i (first-last-n :iterable ten :number 5))))))
+(defn test-last-5 [] (assert (all (gfor i (range 5 10) (in i (first-last-n :iterable ten :number 5 :last True))))))
 #+end_src
 
-** Either?
+** test-flatten.hy
 
 #+begin_src hy
-(defn [zoom] 66c3744b-a036-4476-b1ae-024bc99bee41 []
-              (import oreo [either?])
-              (import collections [OrderedDict])
-              (import addict [Dict])
-              (assert (either? OrderedDict dict))
-              (assert (either? Dict dict))
-              (assert (either? OrderedDict Dict))
-              (assert (= (either? "Dict" Dict) False))
-              (assert (either? "Dict" str))
-              (assert (= (either? "Dict" Dict list) False))
-              (assert (either? "OrderedDict" "Dict"))
-              (assert (either? "OrderedDict" "Dict" list)))
-#+end_src
+(import oreo [flatten])
+(setv nested #(1 #(2 #(3 #(4)))))
+(setv flattened [1 2 3 4])
 
-** First or Last N Values
+(defn test-flatten-one-item [] (assert (= (flatten 1) [1])))
 
-#+begin_src hy
-(defn [zoom] 554446e6-ffb6-4469-b4d2-90282e466751 []
-              (import oreo [first-last-n])
-              (setv ten (range 10))
-              (assert (all (gfor i (range 5) (in i (first-last-n :iterable ten :number 5)))))
-              (assert (all (gfor i (range 5 10) (in i (first-last-n :iterable ten :number 5 :last True))))))
-#+end_src
+(defn test-flatten-all [] (assert (= (flatten nested) flattened)))
+(defn test-flatten-nothing [] (assert (= (flatten nested :times 0) nested)))
+(defn test-flatten-once [] (assert (= (flatten nested :times 1) [1 2 #(3 #(4))])))
+(defn test-flatten-twice [] (assert (= (flatten nested :times 2) [1 2 3 #(4)])))
+(defn test-flatten-thrice [] (assert (= (flatten nested :times 3) flattened)))
 
-** Flatten
-
-#+begin_src hy
-(defn [zoom] a54f24d7-4620-4834-b996-04af2973926f []
-              (import oreo [flatten])
-              (assert (= (flatten 1) [1]))
-              (setv nested #(1 #(2 #(3 #(4)))))
-              (assert (= (flatten nested) [1 2 3 4]))
-              (assert (= (flatten nested :times 0) nested))
-              (assert (= (flatten nested :times 1) [1 2 #(3 #(4))]))
-              (assert (= (flatten nested :times 2) [1 2 3 #(4)]))
-              (assert (= (flatten nested :times 3) [1 2 3 4]))
-              (assert (= (flatten #* nested) [1 2 3 4]))
-              (assert (= (flatten #* nested :times 0) nested))
-              (assert (= (flatten #* nested :times 1) [1 2 #(3 #(4))]))
-              (assert (= (flatten #* nested :times 2) [1 2 3 #(4)]))
-              (assert (= (flatten #* nested :times 3) [1 2 3 4])))
-#+end_src
-
-* Run Everything
-
-#+begin_src hy
-(for [func (eclair funcs "tests" "blue")] (func))
+(defn test-flatten-all-unpacked [] (assert (= (flatten #* nested) flattened)))
+(defn test-flatten-nothing-unpacked [] (assert (= (flatten #* nested :times 0) nested)))
+(defn test-flatten-once-unpacked [] (assert (= (flatten #* nested :times 1) [1 2 #(3 #(4))])))
+(defn test-flatten-twice-unpacked [] (assert (= (flatten #* nested :times 2) [1 2 3 #(4)])))
+(defn test-flatten-thrice-unpacked [] (assert (= (flatten #* nested :times 3) flattened)))
 #+end_src

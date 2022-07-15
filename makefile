@@ -1,19 +1,31 @@
 .RECIPEPREFIX := |
-.DEFAULT_GOAL := test
-export PATH := $(shell nix-shell -E '(import ./.).devShells.$${builtins.currentSystem}.makefile' --show-trace)
+.DEFAULT_GOAL := tangle
+
 mkfilePath := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfileDir := $(dir $(mkfilePath))
+realfileDir := $(realpath $(mkfileDir))
+
+export PATH := $(shell nix-shell -E '(import $(realfileDir)).devShells.$${builtins.currentSystem}.makefile' --show-trace)
+
 tangle:
-|org-tangle $(mkfileDir)/$$(cat $(mkfileDir)/pyproject.toml | tomlq .tool.poetry.name | tr -d '"') $(mkfileDir)/tests.org $(mkfileDir)/nix.org
+|org-tangle $(mkfileDir)/nix.org
 
-test: tangle
-|hy $(mkfileDir)/tests.hy
+add:
+|git add .
 
-poetry2setup:
-|poetry2setup > $(mkfileDir)/setup.py
-
-commit:
+commit: add
 |git -C $(mkfileDir) commit --allow-empty-message -am ""
 
 push: commit
 |git -C $(mkfileDir) push
+
+export PYTHONPATH := $(shell nix-shell -E '(import $(realfileDir)).devShells.$${builtins.currentSystem}.makefile-python' --show-trace)
+
+tangle-python: tangle
+|org-tangle $(mkfileDir)/$$(cat $(mkfileDir)/pyproject.toml | tomlq .tool.poetry.name | tr -d '"') $(mkfileDir)/tests.org
+
+test: tangle-python
+|pytest $(mkfileDir)
+
+poetry2setup:
+|poetry2setup > $(mkfileDir)/setup.py
