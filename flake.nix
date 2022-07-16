@@ -30,7 +30,7 @@
             , toolz
             , pname
             , pytestCheckHook
-            , pytest-hylang
+            , pytest-hy
             , pytest-randomly
         }: let owner = "syvlorg"; in buildPythonPackage rec {
             inherit pname;

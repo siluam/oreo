@@ -1,7 +1,7 @@
 * shell.nix
 
 #+begin_src nix :tangle (meq/tangle-path)
-(import ./.).devShell.${builtins.currentSystem}
+with builtins; ((builtins.getFlake or import) (toString ./.)).devShell.${currentSystem}
 #+end_src
 
 * default.nix
@@ -54,7 +54,7 @@
             , toolz
             , pname
             , pytestCheckHook
-            , pytest-hylang
+            , pytest-hy
             , pytest-randomly
         }: let owner = "syvlorg"; in buildPythonPackage rec {
             inherit pname;
