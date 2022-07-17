@@ -6,4 +6,4 @@
       (.glue test "mnop")
       (.glue test (tea :q "r" :s "t"))
       (.glue test ["v" "x"])
-      (assert (test) "b d f h j lmnopr tv x"))
+      (assert (= (test) "b d f h j lmnopr tv x")))
