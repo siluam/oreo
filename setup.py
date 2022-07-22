@@ -12,7 +12,7 @@ install_requires = \
  'autoslot',
  'click',
  'hy>=0.24.0,<0.25.0',
- 'hyrule',
+ 'hyrule>=0.2,<0.3',
  'more-itertools',
  'nixpkgs',
  'rich @ git+https://github.com/syvlorg/rich.git@master',

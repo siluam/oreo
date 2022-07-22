@@ -11,7 +11,13 @@
 
 #+begin_src hy
 (import click)
-(import os)
+#+end_src
+
+* Eval and Compile
+
+#+begin_src hy
+(eval-and-compile (import os hy))
+(eval-and-compile (import pathlib [Path]))
 #+end_src
 
 ** From
@@ -21,6 +27,7 @@
 (import autoslot [SlotsMeta])
 (import collections [OrderedDict])
 (import collections.abc [Iterable])
+(import contextlib [contextmanager])
 (import hy [mangle unmangle])
 (import hyrule [dec])
 (import importlib.util [spec-from-file-location module-from-spec])
@@ -55,6 +62,23 @@
 
 #+begin_src hy
 (require hyrule [-> assoc])
+#+end_src
+
+* Run Code in Another Directory and Come Back
+
+#+begin_src hy
+(defmacro with-cwd [dir #* body]
+          (setv cwd (hy.gensym))
+          `(let [ ~cwd (.cwd Path) ]
+                (try (.chdir os ~dir)
+                     ~@body
+                     (finally (.chdir os ~cwd)))))
+#+end_src
+
+** Also Set Variables
+
+#+begin_src hy
+(defmacro let-cwd [dir vars #* body] `(let ~vars (with-cwd ~dir ~@body)))
 #+end_src
 
 * Choose Print
@@ -132,10 +156,37 @@ Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given
                   module)))
 #+end_src
 
+* Dots?
+
+#+begin_src hy
+(defn dots? [string] (or (= string ".") (= string "..")))
+#+end_src
+
 * Not Dots?
 
 #+begin_src hy
-(defn nots? [string] (not (or (= string ".") (= string ".."))))
+(defn nots? [string] (not (dots? string)))
+#+end_src
+
+* Hidden?
+
+#+begin_src hy
+(defn hidden? [item] (.startswith item "."))
+#+end_src
+
+* Visible?
+
+#+begin_src hy
+(defn visible? [item] (not (.startswith item ".")))
+#+end_src
+
+* Mimic ls
+
+#+begin_src hy
+(defn ls [[dir None] [sort False]]
+      (let [ dir (or dir (.cwd Path))
+             output (lfor item (if (isinstance dir Path) (.iterdir dir) (.listdir os dir)) :if visible? (getattr item "name" item)) ]
+           (if sort (sorted output) output)))
 #+end_src
 
 * First or Last N Values

@@ -1,6 +1,23 @@
+#+setupfile: /nix/store/m098inpjjyh429v1v67y26rav44j36pn-source/README.org
+
 #+property: header-args:hy+ :tangle (meq/tangle-path)
+#+property: header-args:python+ :tangle (meq/tangle-path)
 
 * tests
+** conftest.py
+
+Adapted from [[https://stackoverflow.com/users/347181/draganhr][draganHR's]] answer [[https://stackoverflow.com/a/35394239/10827766][here]]:
+
+#+begin_src python
+import pytest
+
+@pytest.fixture()
+def cookies():
+    from pathlib import Path
+    # return Path(__file__).parent.parent.resolve(strict = True) / "cookies"
+    return Path.cwd() / "cookies"
+#+end_src
+
 ** test-eclair.hy
 
 #+begin_src hy
@@ -74,4 +91,51 @@
 (defn test-flatten-once-unpacked [] (assert (= (flatten #* nested :times 1) [1 2 #(3 #(4))])))
 (defn test-flatten-twice-unpacked [] (assert (= (flatten #* nested :times 2) [1 2 3 #(4)])))
 (defn test-flatten-thrice-unpacked [] (assert (= (flatten #* nested :times 3) flattened)))
+#+end_src
+
+** test-with-cwd.hy
+
+#+begin_src hy
+(import pathlib [Path])
+(require oreo [with-cwd])
+(defn test-with-cwd [cookies]
+      (let [ cwd (.cwd Path) ]
+           (with-cwd cookies (assert (= (.cwd Path) (/ cwd "cookies"))))
+           (assert (= (.cwd Path) cwd))))
+#+end_src
+
+** test-let-cwd.hy
+
+#+begin_src hy
+(import pathlib [Path])
+(require oreo [let-cwd])
+(defn test-let-cwd [cookies]
+      (setv cwd (.cwd Path))
+      (let-cwd cookies [ cwd cwd ] (= (.cwd Path) (/ cwd "cookies")))
+      (let-cwd cookies [ cwd cwd ] (assert (= (.cwd Path) (/ cwd "cookies"))))
+      (assert (= (.cwd Path) cwd)))
+#+end_src
+
+** test-ls.hy
+
+#+begin_src hy
+(import oreo [ls])
+(require oreo [with-cwd])
+(import os [listdir])
+(import subprocess [check-output])
+(import pathlib [Path])
+(defn test-ls-with-ls [cookies]
+      (assert (= (sorted (filter None (.split (.decode (check-output [ "ls" "cookies" ]) "utf-8") "\n")))
+                 (ls cookies :sort True))))
+(defn test-ls-with-listdir [cookies]
+      (assert (= (sorted (gfor item (listdir cookies) :if (not (.startswith item ".")) item))
+                 (ls cookies :sort True))))
+(defn test-ls-listdir-with-ls [cookies]
+      (assert (= (sorted (filter None (.split (.decode (check-output [ "ls" "cookies" ]) "utf-8") "\n"))))
+                 (ls (str cookies) :sort True)))
+(defn test-ls-listdir-with-listdir [cookies]
+      (assert (= (sorted (gfor item (listdir cookies) :if (not (.startswith item ".")) item))
+                 (ls (str cookies) :sort True))))
+(defn test-ls-with-ls-listdir [cookies] (assert (= (ls cookies :sort True) (ls (str cookies) :sort True))))
+(defn test-ls-cwd [cookies] (with-cwd cookies (assert (= (ls :sort True) (ls cookies :sort True)))))
 #+end_src

@@ -15,6 +15,12 @@ import hy
 
 ** Everything From Oreo
 
+Adapted from [[https://github.com/hylang/hyrule/blob/master/hyrule/__init__.py][here]], with help from [[https://stackoverflow.com/users/1451346/kodiologist][Kodiologist's]] comment [[https://stackoverflow.com/questions/73030667/init-py-for-hy-modules-with-relative-imports#comment128994796_73030667][here]]:
+
 #+begin_src py
-from .oreo import *
+hy.macros.require('oreo.oreo',
+   # The Python equivalent of `(require oreo.oreo *)`
+   None, assignments = 'ALL', prefix = '')
+hy.macros.require_reader('oreo.oreo', None, assignments = 'ALL')
+from oreo.oreo import *
 #+end_src

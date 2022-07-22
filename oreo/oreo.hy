@@ -2,12 +2,15 @@
 (.install rich.traceback :show-locals True)
 
 (import click)
-(import os)
+
+(eval-and-compile (import os hy))
+(eval-and-compile (import pathlib [Path]))
 
 (import addict [Dict :as D])
 (import autoslot [SlotsMeta])
 (import collections [OrderedDict])
 (import collections.abc [Iterable])
+(import contextlib [contextmanager])
 (import hy [mangle unmangle])
 (import hyrule [dec])
 (import importlib.util [spec-from-file-location module-from-spec])
@@ -26,6 +29,15 @@
              (import toolz [first])))
 
 (require hyrule [-> assoc])
+
+(defmacro with-cwd [dir #* body]
+          (setv cwd (hy.gensym))
+          `(let [ ~cwd (.cwd Path) ]
+                (try (.chdir os ~dir)
+                     ~@body
+                     (finally (.chdir os ~cwd)))))
+
+(defmacro let-cwd [dir vars #* body] `(let ~vars (with-cwd ~dir ~@body)))
 
 (defn cprint [obj]
       (if (isinstance obj #(str bytes bytearray))
@@ -76,7 +88,18 @@
                   (getattr module attr)
                   module)))
 
-(defn nots? [string] (not (or (= string ".") (= string ".."))))
+(defn dots? [string] (or (= string ".") (= string "..")))
+
+(defn nots? [string] (not (dots? string)))
+
+(defn hidden? [item] (.startswith item "."))
+
+(defn visible? [item] (not (.startswith item ".")))
+
+(defn ls [[dir None] [sort False]]
+      (let [ dir (or dir (.cwd Path))
+             output (lfor item (if (isinstance dir Path) (.iterdir dir) (.listdir os dir)) :if visible? (getattr item "name" item)) ]
+           (if sort (sorted output) output)))
 
 (defn first-last-n [[iterable None] [last False] [number 0] [type- iter]]
       (setv iterable (tuple iterable)

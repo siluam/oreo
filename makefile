@@ -1,15 +1,15 @@
 .RECIPEPREFIX := |
 .DEFAULT_GOAL := tangle
 
+define nixShell
+nix-shell -E '(import ./.).devShells.$${builtins.currentSystem}.makeshell-$1' --show-trace --run
+endef
+
 mkfilePath := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfileDir := $(dir $(mkfilePath))
 realfileDir := $(realpath $(mkfileDir))
-
-export PATH := $(shell nix-shell -E '(import $(realfileDir)).devShells.$${builtins.currentSystem}.makefile' --show-trace):$(PATH)
-export SHELL := $(shell which sh)
-
-tangle:
-|org-tangle $(mkfileDir)/nix.org
+type := $(shell nix eval --impure --expr '(import ./.).type' | tr -d '"')
+projectName := $(shell nix eval --impure --expr '(import ./.).pname' | tr -d '"')
 
 add:
 |git -C $(mkfileDir) add .
@@ -20,25 +20,21 @@ commit: add
 push: commit
 |git -C $(mkfileDir) push
 
-update: tangle
-|nix flake update $(mkfileDir)
+update:
+|nix flake update
 
-super: update push
+tangle:
+|$(call nixShell,general) "org-tangle $(mkfileDir)/nix.org"
 
-export PYTHONPATH := $(shell nix-shell -E '(import $(realfileDir)).devShells.$${builtins.currentSystem}.makefile-python' --show-trace):$(PYTHONPATH)
-
-tangle-python:
-|org-tangle $(mkfileDir)/$$(cat $(mkfileDir)/pyproject.toml | tomlq .tool.poetry.name | tr -d '"') $(mkfileDir)/tests.org
-
-test: tangle-python
-|pytest $(mkfileDir)
+tangle-python: tangle
+|$(call nixShell,general) "org-tangle $(mkfileDir)/$(projectName) $(mkfileDir)/tests.org"
 
 poetry2setup:
-|poetry2setup > $(mkfileDir)/setup.py
+|$(call nixShell,$(type)) "poetry2setup > $(mkfileDir)/setup.py"
 
-super-python: update test push
+test: tangle-python update 
+|$(call nixShell,$(type)) pytest
 
-echo:
-|@which pytest
-|@echo $$PYTHONPATH
-|@echo $(PYTHONPATH)
+quick: tangle-python push
+
+super: test push
