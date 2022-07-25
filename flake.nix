@@ -1,12 +1,9 @@
 {
     description = "The Stuffing for Other Functions!";
     inputs = rec {
-        settings = {
-            url = github:sylvorg/settings;
-            inputs.pypkg-oreo.follows = "";
-        };
-        # nixpkgs.follows = "settings/nixpkgs";
-        nixpkgs.url = github:nixos/nixpkgs/nixos-22.05;
+        settings.url = github:sylvorg/settings;
+        py3pkg-rich.url = github:syvlorg/rich;
+        py3pkg-pytest-hy.url = github:syvlorg/pytest-hy;
         flake-utils.url = github:numtide/flake-utils;
         flake-compat = {
             url = "github:edolstra/flake-compat";
@@ -14,7 +11,9 @@
         };
     };
     outputs = inputs@{ self, flake-utils, settings, ... }: with builtins; with settings.lib; with flake-utils.lib; settings.mkOutputs {
+        inherit inputs;
         callPackage = { buildPythonPackage
+            , callPackage
             , pythonOlder
             , poetry-core
             , addict
@@ -26,12 +25,12 @@
             , hyrule
             , more-itertools
             , nixpkgs
-            , rich
             , toolz
             , pname
             , pytestCheckHook
-            , pytest-hy
             , pytest-randomly
+            , pytest-hy
+            , rich
         }: let owner = "syvlorg"; in buildPythonPackage rec {
             inherit pname;
             version = j.pyVersion format src;
