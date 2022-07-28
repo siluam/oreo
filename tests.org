@@ -1,9 +1,9 @@
-#+setupfile: /nix/store/m098inpjjyh429v1v67y26rav44j36pn-source/README.org
-
-#+property: header-args:hy+ :tangle (meq/tangle-path)
-#+property: header-args:python+ :tangle (meq/tangle-path)
-
 * tests
+:PROPERTIES:
+:header-args:hy+: :tangle (meq/tangle-path)
+:header-args:python+: :tangle (meq/tangle-path)
+:END:
+
 ** conftest.py
 
 Adapted from [[https://stackoverflow.com/users/347181/draganhr][draganHR's]] answer [[https://stackoverflow.com/a/35394239/10827766][here]]:
