@@ -11,10 +11,13 @@ Adapted from [[https://stackoverflow.com/users/347181/draganhr][draganHR's]] ans
 #+begin_src python
 import pytest
 
+def pytest_internalerror():
+    return False
+
 @pytest.fixture()
-def cookies():
+def cookies(request):
     from pathlib import Path
-    return Path(__file__).parent.parent.resolve(strict = True) / "cookies"
+    return Path(request.config.rootdir).resolve(strict = True) / "cookies"
 #+end_src
 
 ** test-eclair.hy
@@ -129,8 +132,8 @@ def cookies():
       (assert (= (sorted (gfor item (listdir cookies) :if (not (.startswith item ".")) item))
                  (ls cookies :sort True))))
 (defn test-ls-listdir-with-ls [cookies]
-      (assert (= (sorted (filter None (.split (.decode (check-output [ "ls" "cookies" ]) "utf-8") "\n"))))
-                 (ls (str cookies) :sort True)))
+      (assert (= (sorted (filter None (.split (.decode (check-output [ "ls" "cookies" ]) "utf-8") "\n")))
+                 (ls (str cookies) :sort True))))
 (defn test-ls-listdir-with-listdir [cookies]
       (assert (= (sorted (gfor item (listdir cookies) :if (not (.startswith item ".")) item))
                  (ls (str cookies) :sort True))))

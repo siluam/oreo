@@ -10,8 +10,8 @@
       (assert (= (sorted (gfor item (listdir cookies) :if (not (.startswith item ".")) item))
                  (ls cookies :sort True))))
 (defn test-ls-listdir-with-ls [cookies]
-      (assert (= (sorted (filter None (.split (.decode (check-output [ "ls" "cookies" ]) "utf-8") "\n"))))
-                 (ls (str cookies) :sort True)))
+      (assert (= (sorted (filter None (.split (.decode (check-output [ "ls" "cookies" ]) "utf-8") "\n")))
+                 (ls (str cookies) :sort True))))
 (defn test-ls-listdir-with-listdir [cookies]
       (assert (= (sorted (gfor item (listdir cookies) :if (not (.startswith item ".")) item))
                  (ls (str cookies) :sort True))))

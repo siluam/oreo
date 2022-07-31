@@ -28,7 +28,9 @@
      (except [ImportError]
              (import toolz [first])))
 
-(require hyrule [-> assoc])
+(require hyrule [-> assoc unless])
+
+(defmacro assert [a [b True] [message None]] `(if (= ~a ~b) ~a (raise (AssertionError (or ~message ~a)))))
 
 (defmacro with-cwd [dir #* body]
           (setv cwd (hy.gensym))

@@ -1,5 +1,3 @@
-#+setupfile: ./settings/README.org
-
 * The Stuffing for Other Functions!
 ** Tea
 :PROPERTIES:

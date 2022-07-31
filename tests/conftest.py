@@ -1,6 +1,9 @@
 import pytest
 
+def pytest_internalerror():
+    return False
+
 @pytest.fixture()
-def cookies():
+def cookies(request):
     from pathlib import Path
-    return Path(__file__).parent.parent.resolve(strict = True) / "cookies"
+    return Path(request.config.rootdir).resolve(strict = True) / "cookies"
