@@ -39,7 +39,7 @@
                      ~@body
                      (finally (.chdir os ~cwd)))))
 
-(defmacro let-cwd [dir vars #* body] `(do (require oreo.oreo [with-cwd]) (let ~vars (with-cwd ~dir ~@body))))
+(defmacro let-cwd [dir vars #* body] (setv with-cwd (hy.gensym)) `(do (require oreo.oreo [with-cwd :as ~with-cwd]) (let ~vars (~with-cwd ~dir ~@body))))
 
 (defn cprint [obj]
       (if (isinstance obj #(str bytes bytearray))
