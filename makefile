@@ -26,7 +26,7 @@ endif
 files := $(preFiles) $(mkfileDir)/$(projectName)
 tangleTask := $(shell [ -e $(mkfileDir)/tests -o -e $(mkfileDir)/tests.org ] && echo test || echo tangle)
 addCommand := git -C $(mkfileDir) add .
-tangleCommand := ((yes yes | ($(call nixShell,general) "org-tangle -f $(files)")) || (yes yes | org-tangle -f $(files))) && $(addCommand)
+tangleCommand := (($(call nixShell,general) "org-tangle -f $(files)") || org-tangle -f $(files)) && $(addCommand)
 
 add:
 |$(addCommand)

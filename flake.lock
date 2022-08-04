@@ -1468,11 +1468,11 @@
         "settings": "settings"
       },
       "locked": {
-        "lastModified": 1659572102,
-        "narHash": "sha256-zdlHbdQaB8icg4MWB28f6XL0y9WTgmD61qjMq8bHKV4=",
+        "lastModified": 1659580322,
+        "narHash": "sha256-dzgeZP3qJ+Q7OYMSPhGvWCRosRd4LKro3B7w3iMAALo=",
         "owner": "syvlorg",
         "repo": "pytest-hy",
-        "rev": "ec3139ca6819bce24f3f74d10be8b92abd63e9c6",
+        "rev": "4e70903443dc60c59e2c66d7ac1ad34ba81121c6",
         "type": "github"
       },
       "original": {
@@ -1538,11 +1538,11 @@
         "sysget": "sysget"
       },
       "locked": {
-        "lastModified": 1659571879,
-        "narHash": "sha256-9iXc/aTHx6ghGLTIkoCWOri4JfpeSU5YBHnXZW/Fk3o=",
+        "lastModified": 1659579980,
+        "narHash": "sha256-Oy/3yCHZKDFpF0WIrhVZCuPiNi2FMcDVN9bXnIyc0qY=",
         "owner": "sylvorg",
         "repo": "settings",
-        "rev": "da1a702dde6ca33e842f94452bb2dcd530a2e512",
+        "rev": "1c0f932e2fb928fb1df098d8a7c6ee37208e0160",
         "type": "github"
       },
       "original": {
@@ -1620,11 +1620,11 @@
         "sysget": "sysget_3"
       },
       "locked": {
-        "lastModified": 1659571879,
-        "narHash": "sha256-9iXc/aTHx6ghGLTIkoCWOri4JfpeSU5YBHnXZW/Fk3o=",
+        "lastModified": 1659579980,
+        "narHash": "sha256-Oy/3yCHZKDFpF0WIrhVZCuPiNi2FMcDVN9bXnIyc0qY=",
         "owner": "sylvorg",
         "repo": "settings",
-        "rev": "da1a702dde6ca33e842f94452bb2dcd530a2e512",
+        "rev": "1c0f932e2fb928fb1df098d8a7c6ee37208e0160",
         "type": "github"
       },
       "original": {
