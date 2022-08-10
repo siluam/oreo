@@ -197,7 +197,7 @@ Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given
       (let [ dir (or dir (.cwd Path))
              output (lfor item (if (isinstance dir Path) (.iterdir dir) (.listdir os dir)) :if visible? (getattr item "name" item)) ]
            (if (or sort (!= key False) reverse)
-               (sorted output :key (if (callable key) key str.lower) :reverse reverse)
+               (sorted output :key (if (callable key) key None) :reverse reverse)
                output)))
 #+end_src
 

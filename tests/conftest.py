@@ -11,7 +11,7 @@ def cookies(request):
 @pytest.fixture()
 def cookies_ls(cookies):
     from subprocess import check_output
-    return list(filter(None, check_output(["ls", cookies]).decode("utf-8").split("\n")))
+    return sorted(filter(None, check_output(["ls", cookies]).decode("utf-8").split("\n")))
 
 @pytest.fixture()
 def cookies_generator(cookies):
@@ -21,4 +21,4 @@ def cookies_generator(cookies):
 
 @pytest.fixture()
 def cookies_listdir(cookies_generator):
-    return sorted(cookies_generator, key = str.lower)
+    return sorted(cookies_generator)

@@ -104,7 +104,7 @@
       (let [ dir (or dir (.cwd Path))
              output (lfor item (if (isinstance dir Path) (.iterdir dir) (.listdir os dir)) :if visible? (getattr item "name" item)) ]
            (if (or sort (!= key False) reverse)
-               (sorted output :key (if (callable key) key str.lower) :reverse reverse)
+               (sorted output :key (if (callable key) key None) :reverse reverse)
                output)))
 
 (defn first-last-n [[iterable None] [last False] [number 0] [type- iter]]
