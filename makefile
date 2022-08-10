@@ -107,7 +107,7 @@ touch-tests:
 tut: tu touch-tests
 
 define pytest
-$(call nixShell,$(type)) "pytest $1"
+$(call nixShell,$(type)) "pytest $1 $(mkfileDir)"
 endef
 
 test: tut

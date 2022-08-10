@@ -117,7 +117,7 @@ def cookies_listdir(cookies_generator):
 (require oreo [with-cwd])
 (defn test-with-cwd [cookies]
       (let [ cwd (.cwd Path) ]
-           (with-cwd cookies (assert (= (.cwd Path) (/ cwd "cookies"))))
+           (with-cwd cookies (assert (= (.cwd Path) cookies)))
            (assert (= (.cwd Path) cwd))))
 #+end_src
 
@@ -128,8 +128,7 @@ def cookies_listdir(cookies_generator):
 (require oreo [let-cwd])
 (defn test-let-cwd [cookies]
       (setv cwd (.cwd Path))
-      (let-cwd cookies [ cwd cwd ] (= (.cwd Path) (/ cwd "cookies")))
-      (let-cwd cookies [ cwd cwd ] (assert (= (.cwd Path) (/ cwd "cookies"))))
+      (let-cwd cookies [ cwd cwd ] (assert (= (.cwd Path) cookies)))
       (assert (= (.cwd Path) cwd)))
 #+end_src
 
