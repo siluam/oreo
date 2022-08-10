@@ -53,7 +53,7 @@
                 toolz
             ];
             checkInputs = [ pytestCheckHook pytest-hy pytest-randomly ];
-            checkPhase = "pytest --tb=native";
+            checkPhase = "pytest";
             pythonImportsCheck = [ pname ];
             postPatch = ''
                 substituteInPlace pyproject.toml --replace "rich = { git = \"https://github.com/${owner}/rich.git\", branch = \"master\" }" ""

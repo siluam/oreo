@@ -18,6 +18,21 @@ def pytest_internalerror():
 def cookies(request):
     from pathlib import Path
     return Path(request.config.rootdir).resolve(strict = True) / "cookies"
+
+@pytest.fixture()
+def cookies_ls(cookies):
+    from subprocess import check_output
+    return list(filter(None, check_output(["ls", cookies]).decode("utf-8").split("\n")))
+
+@pytest.fixture()
+def cookies_generator(cookies):
+    from oreo import is_visible
+    from os import listdir
+    return (item for item in listdir(cookies) if is_visible(item))
+
+@pytest.fixture()
+def cookies_listdir(cookies_generator):
+    return sorted(cookies_generator, key = str.lower)
 #+end_src
 
 ** test-eclair.hy
@@ -123,21 +138,17 @@ def cookies(request):
 #+begin_src hy
 (import oreo [ls])
 (require oreo [with-cwd])
-(import os [listdir])
-(import subprocess [check-output])
 (import pathlib [Path])
-(defn test-ls-with-ls [cookies]
-      (assert (= (sorted (filter None (.split (.decode (check-output [ "ls" "cookies" ]) "utf-8") "\n")))
-                 (ls cookies :sort True))))
-(defn test-ls-with-listdir [cookies]
-      (assert (= (sorted (gfor item (listdir cookies) :if (not (.startswith item ".")) item))
-                 (ls cookies :sort True))))
-(defn test-ls-listdir-with-ls [cookies]
-      (assert (= (sorted (filter None (.split (.decode (check-output [ "ls" "cookies" ]) "utf-8") "\n")))
-                 (ls (str cookies) :sort True))))
-(defn test-ls-listdir-with-listdir [cookies]
-      (assert (= (sorted (gfor item (listdir cookies) :if (not (.startswith item ".")) item))
-                 (ls (str cookies) :sort True))))
+(defn test-ls-with-ls [cookies cookies-ls] (assert (= cookies-ls (ls cookies :sort True))))
+(defn test-ls-with-listdir [cookies cookies-listdir] (assert (= cookies-listdir (ls cookies :sort True))))
+(defn test-ls-listdir-with-ls [cookies cookies-ls] (assert (= cookies-ls (ls (str cookies) :sort True))))
+(defn test-ls-listdir-with-listdir [cookies cookies-listdir] (assert (= cookies-listdir (ls (str cookies) :sort True))))
+(defn test-ls-sort-reverse [cookies cookies-listdir] (assert (= (cut cookies-listdir None None -1) (ls cookies :reverse True))))
+(defn test-ls-sort-key-true [cookies cookies-listdir] (assert (= cookies-listdir (ls cookies :key True))))
+(defn test-ls-sort-key-function [cookies cookies-generator]
+      (let [ func (fn [item] (if (.isnumeric item) (int item) -1)) ]
+           (assert (= (sorted cookies-generator :key func)
+                      (ls cookies :key func)))))
 (defn test-ls-with-ls-listdir [cookies] (assert (= (ls cookies :sort True) (ls (str cookies) :sort True))))
 (defn test-ls-cwd [cookies] (with-cwd cookies (assert (= (ls :sort True) (ls cookies :sort True)))))
 #+end_src

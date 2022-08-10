@@ -30,7 +30,7 @@
 
 (require hyrule [-> assoc unless])
 
-(defmacro assert [a [b True] [message None]] `(if (= ~a ~b) ~a (raise (AssertionError (or ~message ~a)))))
+(defmacro Assert [a [b True] [message None]] `(if (= ~a ~b) ~a (raise (AssertionError (or ~message ~a)))))
 
 (defmacro with-cwd [dir #* body]
           (setv cwd (hy.gensym))
@@ -100,10 +100,12 @@
 
 (defn visible? [item] (not (.startswith item ".")))
 
-(defn ls [[dir None] [sort False]]
+(defn ls [[dir None] [sort False] [key False] [reverse False]]
       (let [ dir (or dir (.cwd Path))
              output (lfor item (if (isinstance dir Path) (.iterdir dir) (.listdir os dir)) :if visible? (getattr item "name" item)) ]
-           (if sort (sorted output) output)))
+           (if (or sort (!= key False) reverse)
+               (sorted output :key (if (callable key) key str.lower) :reverse reverse)
+               output)))
 
 (defn first-last-n [[iterable None] [last False] [number 0] [type- iter]]
       (setv iterable (tuple iterable)
