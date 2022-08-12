@@ -1,3 +1,5 @@
+#+setupfile: /home/shadowrylander/settings/README.org
+
 #+property: header-args:hy+ :tangle yes
 
 * Rich Traceback
@@ -709,7 +711,7 @@ A play on words between ~ginseng~ tea and ~gen-string~!
 *** __call__
 
 #+begin_src hy
-(defn __call__ [self #* args #** kwargs] (.gin self #* args #** kwargs))
+(defn __call__ [self [delimiter " "] [override-type None]] (.gin self :delimiter delimiter :override-type override-type))
 #+end_src
 
 *** __str__
@@ -814,6 +816,17 @@ Adapted from [[https://stackoverflow.com/users/3218806/maxbellec][maxbellec's]] 
       (for [key subtrahend]
            (del (get scopy key)))
       (return scopy))
+#+end_src
+
+*** __eq__
+
+#+begin_src hy
+(defn __eq__ [self expr]
+      (return (cond (isinstance expr self.__class__) (= (expr) (self))
+                    (isinstance expr dict) (= (.items self) (.items (dfor [k v] (.items expr) [k.name v])))
+                    (coll? expr) (all (gfor [a b] (zip (.values self) expr :strict True) (= a b)))
+                    (isinstance expr str) (= (self) expr)
+                    True False)))
 #+end_src
 
 *** End of Tea

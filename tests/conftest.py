@@ -1,8 +1,5 @@
 import pytest
 
-def pytest_internalerror():
-    return False
-
 @pytest.fixture()
 def cookies(request):
     from pathlib import Path

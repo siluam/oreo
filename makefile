@@ -12,13 +12,13 @@ realfileDir := $(realpath $(mkfileDir))
 preFiles := $(mkfileDir)/nix.org $(mkfileDir)/flake.org $(mkfileDir)/tests.org $(mkfileDir)/README.org
 
 pnCommand := nix eval --show-trace --impure --expr '(import $(realfileDir)).pname'
-projectName := $(subst ",,$(shell $(pnCommand) || (org-tangle -f $(preFiles) && $(pnCommand))))
+projectName := $(subst ",,$(shell (find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null || :) && ($(pnCommand) || ((org-tangle -f $(preFiles) &> /dev/null) && $(pnCommand)))))
 ifndef projectName
 $(error Sorry; unable to get the name of the project)
 endif
 
 typeCommand := nix eval --show-trace --impure --expr '(import $(realfileDir)).type'
-type := $(subst ",,$(shell $(typeCommand) || (org-tangle -f $(preFiles) && $(typeCommand))))
+type := $(subst ",,$(shell (find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null || :) && ($(typeCommand) || ((org-tangle -f $(preFiles) &> /dev/null) && $(typeCommand)))))
 ifndef type
 $(error Sorry; unable to get the type of project)
 endif
@@ -62,10 +62,13 @@ else
 |$(updateInput) $(input)
 endif
 
-tangle: update-settings
+pre-tangle: update-settings
+|-find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null
+
+tangle: pre-tangle
 |$(call tangleCommand,$(files))
 
-tangle-%: update-settings
+tangle-%: pre-tangle
 |$(eval file := $(mkfileDir)/$(call wildcardValue,$@).org)
 |$(call tangleCommand,$(file))
 

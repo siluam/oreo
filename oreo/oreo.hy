@@ -361,7 +361,7 @@
                                     total)
                                True (raise (TypeError "Sorry! All values in the tea must be of the same type to join!")))))))
 
-(defn __call__ [self #* args #** kwargs] (.gin self #* args #** kwargs))
+(defn __call__ [self [delimiter " "] [override-type None]] (.gin self :delimiter delimiter :override-type override-type))
 
 (defn __str__ [self] (.gin self :override-type str))
 
@@ -426,5 +426,12 @@
       (for [key subtrahend]
            (del (get scopy key)))
       (return scopy))
+
+(defn __eq__ [self expr]
+      (return (cond (isinstance expr self.__class__) (= (expr) (self))
+                    (isinstance expr dict) (= (.items self) (.items (dfor [k v] (.items expr) [k.name v])))
+                    (coll? expr) (all (gfor [a b] (zip (.values self) expr :strict True) (= a b)))
+                    (isinstance expr str) (= (self) expr)
+                    True False)))
 
 )
