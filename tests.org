@@ -74,19 +74,13 @@ def cookies_listdir(cookies_generator):
 (import oreo [either?])
 (import collections [OrderedDict])
 (import addict [Dict])
-
 (defn test-either-OrderedDict-dict [] (assert (either? OrderedDict dict)))
 (defn test-either-OrderedDict-Dict [] (assert (either? OrderedDict Dict)))
 (defn test-either-Dict-dict [] (assert (either? Dict dict)))
-
 (defn test-either-Dict-not-string [] (assert (= (either? "Dict" Dict) False)))
-
 (defn test-either-isinstance-string [] (assert (either? "Dict" str)))
-
 (defn test-either-none-of [] (assert (= (either? "Dict" Dict list) False)))
-
 (defn test-either-one-of [] (assert (either? "OrderedDict" "Dict" list)))
-
 (defn test-either-instances [] (assert (either? "OrderedDict" "Dict")))
 #+end_src
 
@@ -95,9 +89,38 @@ def cookies_listdir(cookies_generator):
 #+begin_src hy
 (import oreo [first-last-n])
 (setv ten (range 10))
-
 (defn test-first-5 [] (assert (all (gfor i (range 5) (in i (first-last-n :iterable ten :number 5))))))
 (defn test-last-5 [] (assert (all (gfor i (range 5 10) (in i (first-last-n :iterable ten :number 5 :last True))))))
+#+end_src
+
+** test-remove-prefix-suffix-n.hy
+
+#+begin_src hy
+(import oreo [remove-prefix-n remove-suffix-n])
+(setv prefix-kwargs { "string" "rowrowrowyourboat" "prefix" "row" }
+      suffix-kwargs { "string" "letsgogogo" "suffix" "go" }
+      scp-kwargs { "string" "rrryb" "prefix" "r" }
+      scs-kwargs { "string" "lggg" "suffix" "g" })
+(defn test-remove-prefix-n [] (assert (= (remove-prefix-n :n 0 #** prefix-kwargs) "yourboat")))
+(defn test-remove-prefix-n-once [] (assert (= (remove-prefix-n #** prefix-kwargs) "rowrowyourboat")))
+(defn test-remove-prefix-n-twice [] (assert (= (remove-prefix-n :n 2 #** prefix-kwargs) "rowyourboat")))
+(defn test-remove-prefix-n-thrice [] (assert (= (remove-prefix-n :n 3 #** prefix-kwargs) "yourboat")))
+(defn test-remove-prefix-n-four-times [] (assert (= (remove-prefix-n :n 4 #** prefix-kwargs) "yourboat")))
+(defn test-remove-suffix-n [] (assert (= (remove-suffix-n :n 0 #** suffix-kwargs) "lets")))
+(defn test-remove-suffix-n-once [] (assert (= (remove-suffix-n #** suffix-kwargs) "letsgogo")))
+(defn test-remove-suffix-n-twice [] (assert (= (remove-suffix-n :n 2 #** suffix-kwargs) "letsgo")))
+(defn test-remove-suffix-n-thrice [] (assert (= (remove-suffix-n :n 3 #** suffix-kwargs) "lets")))
+(defn test-remove-suffix-n-four-times [] (assert (= (remove-suffix-n :n 4 #** suffix-kwargs) "lets")))
+(defn test-remove-scp-n [] (assert (= (remove-prefix-n :n 0 #** scp-kwargs) "yb")))
+(defn test-remove-scp-n-once [] (assert (= (remove-prefix-n #** scp-kwargs) "rryb")))
+(defn test-remove-scp-n-twice [] (assert (= (remove-prefix-n :n 2 #** scp-kwargs) "ryb")))
+(defn test-remove-scp-n-thrice [] (assert (= (remove-prefix-n :n 3 #** scp-kwargs) "yb")))
+(defn test-remove-scp-n-four-times [] (assert (= (remove-prefix-n :n 4 #** scp-kwargs) "yb")))
+(defn test-remove-scs-n [] (assert (= (remove-suffix-n :n 0 #** scs-kwargs) "l")))
+(defn test-remove-scs-n-once [] (assert (= (remove-suffix-n #** scs-kwargs) "lgg")))
+(defn test-remove-scs-n-twice [] (assert (= (remove-suffix-n :n 2 #** scs-kwargs) "lg")))
+(defn test-remove-scs-n-thrice [] (assert (= (remove-suffix-n :n 3 #** scs-kwargs) "l")))
+(defn test-remove-scs-n-four-times [] (assert (= (remove-suffix-n :n 4 #** scs-kwargs) "l")))
 #+end_src
 
 ** test-flatten.hy
@@ -106,15 +129,12 @@ def cookies_listdir(cookies_generator):
 (import oreo [flatten])
 (setv nested #(1 #(2 #(3 #(4)))))
 (setv flattened [1 2 3 4])
-
 (defn test-flatten-one-item [] (assert (= (flatten 1) [1])))
-
 (defn test-flatten-all [] (assert (= (flatten nested) flattened)))
 (defn test-flatten-nothing [] (assert (= (flatten nested :times 0) nested)))
 (defn test-flatten-once [] (assert (= (flatten nested :times 1) [1 2 #(3 #(4))])))
 (defn test-flatten-twice [] (assert (= (flatten nested :times 2) [1 2 3 #(4)])))
 (defn test-flatten-thrice [] (assert (= (flatten nested :times 3) flattened)))
-
 (defn test-flatten-all-unpacked [] (assert (= (flatten #* nested) flattened)))
 (defn test-flatten-nothing-unpacked [] (assert (= (flatten #* nested :times 0) nested)))
 (defn test-flatten-once-unpacked [] (assert (= (flatten #* nested :times 1) [1 2 #(3 #(4))])))

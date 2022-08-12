@@ -152,43 +152,20 @@
                             value)]))))
 
 (defn remove-fix-n [rfix string fix [n 1]]
+      (defn inner [string] ((getattr string (+ "remove" rfix)) fix))
       (setv old-string "")
       (if n
           (for [i (range n)]
-               (setv string ((getattr string (+ "remove" rfix)) fix)))
+               (setv string (inner string)))
           (if (= (len fix) 1)
-              (setv string ((getattr string (+ (if (= fix "prefix") "l" "r") "strip")) string fix))
+              (setv string ((getattr string (+ (if (= rfix "prefix") "l" "r") "strip")) fix))
               (while (!= old-string string)
                      (setv old-string string
-                           string (.removeprefix string fix)))))
-      (return string))
-
-#_(defn remove-prefix-n [string prefix [n 1]]
-      (setv old-string "")
-      (if n
-          (for [i (range n)]
-               (setv string (.removeprefix string prefix)))
-          (if (= (len prefix) 1)
-              (setv string (.lstrip string prefix))
-              (while (!= old-string string)
-                     (setv old-string string
-                           string (.removeprefix string prefix)))))
+                           string (inner string)))))
       (return string))
 
 (defn remove-prefix-n [string prefix [n 1]]
       (return (remove-fix-n "prefix" string prefix :n n)))
-
-#_(defn remove-suffix-n [string suffix [n 1]]
-      (setv old-string "")
-      (if n
-          (for [i (range n)]
-               (setv string (.removesuffix string suffix)))
-          (if (= (len suffix) 1)
-              (setv string (.rstrip string suffix))
-              (while (!= old-string string)
-                     (setv old-string string
-                           string (.removesuffix string suffix)))))
-      (return string))
 
 (defn remove-suffix-n [string suffix [n 1]]
       (return (remove-fix-n "suffix" string suffix :n n)))
