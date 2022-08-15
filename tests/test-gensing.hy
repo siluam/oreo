@@ -9,13 +9,11 @@
       (.glue test (tea :q "r" :s "t"))
       (.glue test ["v" "x"])
       (assert (= (test) "b d f h j lmnopr tv x")))
-(defn [mark.gensing (.parametrize mark "b" [
+(defn [mark.gensing (.parametrize mark "rhs" #(
       { :a "b" :c "d" }
       { "a" "b" "c" "d" }
       ["b" "d"]
       "b d"
       (tea :a "b" :c "d")
       (tea "b" "d")
-])] test-gensing-equality [b]
-      (setv a (tea :a "b" :c "d"))
-      (assert (= a b)))
+))] test-gensing-equality [rhs] (assert (= (tea :a "b" :c "d") rhs)))

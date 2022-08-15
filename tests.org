@@ -57,16 +57,14 @@ def cookies_listdir(cookies_generator):
       (.glue test (tea :q "r" :s "t"))
       (.glue test ["v" "x"])
       (assert (= (test) "b d f h j lmnopr tv x")))
-(defn [mark.gensing (.parametrize mark "b" [
+(defn [mark.gensing (.parametrize mark "rhs" #(
       { :a "b" :c "d" }
       { "a" "b" "c" "d" }
       ["b" "d"]
       "b d"
       (tea :a "b" :c "d")
       (tea "b" "d")
-])] test-gensing-equality [b]
-      (setv a (tea :a "b" :c "d"))
-      (assert (= a b)))
+))] test-gensing-equality [rhs] (assert (= (tea :a "b" :c "d") rhs)))
 #+end_src
 
 ** test-either?.hy
@@ -75,18 +73,18 @@ def cookies_listdir(cookies_generator):
 (import addict [Dict])
 (import collections [OrderedDict])
 (import oreo [either?])
-(defn [mark.either (.parametrize mark "types" [
+(defn [mark.either (.parametrize mark "types" #(
       #(OrderedDict dict)
       #(OrderedDict Dict)
       #(Dict dict)
       #("Dict" str)
       #("OrderedDict" "Dict" list)
       #("OrderedDict" "Dict")
-])] test-either [types] (assert (either? #* types)))
-(defn [mark.either (.parametrize mark "types" [
+))] test-either [types] (assert (either? #* types)))
+(defn [mark.either (.parametrize mark "types" #(
       #("Dict" Dict)
       #("Dict" Dict list)
-])] test-either-false [types] (assert (= (either? #* types) False)))
+))] test-either-false [types] (assert (= (either? #* types) False)))
 #+end_src
 
 ** test-first-last-n.hy
@@ -164,8 +162,8 @@ def cookies_listdir(cookies_generator):
       (fn [cookies] (ls (str cookies) :sort True))
       (fn [cookies] (ls cookies :key True))
 ))
-(defn [mark.ls parametrized.zip] test-ls-ls [cookies cookies-ls [func funcs]] (assert (= ((first func) cookies) cookies-ls)))
-(defn [mark.ls parametrized.zip] test-ls-listdir [cookies cookies-listdir [func funcs]] (assert (= ((first func) cookies) cookies-listdir)))
+(defn [mark.ls (.parametrize mark "func" funcs)] test-ls-ls [cookies cookies-ls func] (assert (= (func cookies) cookies-ls)))
+(defn [mark.ls (.parametrize mark "func" funcs)] test-ls-listdir [cookies cookies-listdir func] (assert (= (func cookies) cookies-listdir)))
 (defn [mark.ls] test-ls-sort-reverse [cookies cookies-listdir] (assert (= (cut cookies-listdir None None -1) (ls cookies :reverse True))))
 (defn [mark.ls] test-ls-cwd [cookies] (with-cwd cookies (assert (= (ls :sort True) (ls cookies :sort True)))))
 (defn [mark.ls] test-ls-sort-key-function [cookies cookies-generator]

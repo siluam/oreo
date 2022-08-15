@@ -3,15 +3,15 @@
 (import addict [Dict])
 (import collections [OrderedDict])
 (import oreo [either?])
-(defn [mark.either (.parametrize mark "types" [
+(defn [mark.either (.parametrize mark "types" #(
       #(OrderedDict dict)
       #(OrderedDict Dict)
       #(Dict dict)
       #("Dict" str)
       #("OrderedDict" "Dict" list)
       #("OrderedDict" "Dict")
-])] test-either [types] (assert (either? #* types)))
-(defn [mark.either (.parametrize mark "types" [
+))] test-either [types] (assert (either? #* types)))
+(defn [mark.either (.parametrize mark "types" #(
       #("Dict" Dict)
       #("Dict" Dict list)
-])] test-either-false [types] (assert (= (either? #* types) False)))
+))] test-either-false [types] (assert (= (either? #* types) False)))
