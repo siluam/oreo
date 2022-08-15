@@ -27,7 +27,25 @@ poetry = "*"
 poetry2setup = "*"
 pytest-hy = "*"
 pytest-randomly = "*"
+pytest-parametrized = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = [
+	"--strict-markers",
+]
+markers = [
+	"either",
+	"first_last_n",
+	"flatten",
+	"gensing",
+	"let_cwd",
+	"ls",
+	"remove_prefix_n",
+	"remove_suffix_n",
+	"with_cwd",
+    "eclair",
+]

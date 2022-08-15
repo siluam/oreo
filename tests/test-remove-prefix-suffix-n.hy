@@ -1,25 +1,12 @@
+(import parametrized [parametrized])
+(import pytest [mark])
 (import oreo [remove-prefix-n remove-suffix-n])
-(setv prefix-kwargs { "string" "rowrowrowyourboat" "prefix" "row" }
-      suffix-kwargs { "string" "letsgogogo" "suffix" "go" }
-      scp-kwargs { "string" "rrryb" "prefix" "r" }
-      scs-kwargs { "string" "lggg" "suffix" "g" })
-(defn test-remove-prefix-n [] (assert (= (remove-prefix-n :n 0 #** prefix-kwargs) "yourboat")))
-(defn test-remove-prefix-n-once [] (assert (= (remove-prefix-n #** prefix-kwargs) "rowrowyourboat")))
-(defn test-remove-prefix-n-twice [] (assert (= (remove-prefix-n :n 2 #** prefix-kwargs) "rowyourboat")))
-(defn test-remove-prefix-n-thrice [] (assert (= (remove-prefix-n :n 3 #** prefix-kwargs) "yourboat")))
-(defn test-remove-prefix-n-four-times [] (assert (= (remove-prefix-n :n 4 #** prefix-kwargs) "yourboat")))
-(defn test-remove-suffix-n [] (assert (= (remove-suffix-n :n 0 #** suffix-kwargs) "lets")))
-(defn test-remove-suffix-n-once [] (assert (= (remove-suffix-n #** suffix-kwargs) "letsgogo")))
-(defn test-remove-suffix-n-twice [] (assert (= (remove-suffix-n :n 2 #** suffix-kwargs) "letsgo")))
-(defn test-remove-suffix-n-thrice [] (assert (= (remove-suffix-n :n 3 #** suffix-kwargs) "lets")))
-(defn test-remove-suffix-n-four-times [] (assert (= (remove-suffix-n :n 4 #** suffix-kwargs) "lets")))
-(defn test-remove-scp-n [] (assert (= (remove-prefix-n :n 0 #** scp-kwargs) "yb")))
-(defn test-remove-scp-n-once [] (assert (= (remove-prefix-n #** scp-kwargs) "rryb")))
-(defn test-remove-scp-n-twice [] (assert (= (remove-prefix-n :n 2 #** scp-kwargs) "ryb")))
-(defn test-remove-scp-n-thrice [] (assert (= (remove-prefix-n :n 3 #** scp-kwargs) "yb")))
-(defn test-remove-scp-n-four-times [] (assert (= (remove-prefix-n :n 4 #** scp-kwargs) "yb")))
-(defn test-remove-scs-n [] (assert (= (remove-suffix-n :n 0 #** scs-kwargs) "l")))
-(defn test-remove-scs-n-once [] (assert (= (remove-suffix-n #** scs-kwargs) "lgg")))
-(defn test-remove-scs-n-twice [] (assert (= (remove-suffix-n :n 2 #** scs-kwargs) "lg")))
-(defn test-remove-scs-n-thrice [] (assert (= (remove-suffix-n :n 3 #** scs-kwargs) "l")))
-(defn test-remove-scs-n-four-times [] (assert (= (remove-suffix-n :n 4 #** scs-kwargs) "l")))
+(setv fives (range 5))
+(defn [mark.remove-prefix-n parametrized.zip] test-remove-prefix-n [[n fives] [output #("yourboat" "rowrowyourboat" "rowyourboat" "yourboat" "yourboat")]]
+      (assert (= (remove-prefix-n :string "rowrowrowyourboat" :prefix "row" :n n))))
+(defn [mark.remove-suffix-n parametrized.zip] test-remove-suffix-n [[n fives] [output #("lets" "letsgogo" "letsgo" "lets" "lets")]]
+      (assert (= (remove-prefix-n :string "letsgogogo" :prefix "go" :n n))))
+(defn [mark.remove-prefix-n parametrized.zip] test-remove-single-character-prefix-n [[n fives] [output #("yb" "rryb" "ryb" "yb" "yb")]]
+      (assert (= (remove-prefix-n :string "rrryb" :prefix "r" :n n))))
+(defn [mark.remove-suffix-n parametrized.zip] test-remove-single-character-suffix-n [[n fives] [output #("l" "lgg" "lg" "l" "l")]]
+      (assert (= (remove-prefix-n :string "lggg" :prefix "g" :n n))))

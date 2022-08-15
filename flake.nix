@@ -30,6 +30,7 @@
             , pytestCheckHook
             , pytest-randomly
             , pytest-hy
+            , pytest-parametrized
             , rich
         }: let owner = "syvlorg"; in buildPythonPackage rec {
             inherit pname;
@@ -52,7 +53,7 @@
                 rich
                 toolz
             ];
-            checkInputs = [ pytestCheckHook pytest-hy pytest-randomly ];
+            checkInputs = [ pytestCheckHook pytest-hy pytest-randomly pytest-parametrized ];
             checkPhase = "pytest";
             pythonImportsCheck = [ pname ];
             postPatch = ''

@@ -406,7 +406,7 @@
 
 (defn __eq__ [self expr]
       (return (cond (isinstance expr self.__class__) (= (expr) (self))
-                    (isinstance expr dict) (= (.items self) (.items (dfor [k v] (.items expr) [k.name v])))
+                    (isinstance expr dict) (= (.items self) (.items (dfor [k v] (.items expr) [(if (isinstance k hy.models.Keyword) k.name k) v])))
                     (coll? expr) (all (gfor [a b] (zip (.values self) expr :strict True) (= a b)))
                     (isinstance expr str) (= (self) expr)
                     True False)))
