@@ -1,13 +1,6 @@
+
 .RECIPEPREFIX := |
 .DEFAULT_GOAL := tangle
-
-define nixShell
-nix-shell -E '(import $(realfileDir)).devShells.$${builtins.currentSystem}.makeshell-$1' --show-trace --run
-endef
-
-define quickShell
-nix-shell -E 'with (import $(realfileDir)).pkgs.$${builtins.currentSystem}; with lib; mkShell { buildInputs = flatten [ $1 ]; }' --show-trace
-endef
 
 mkfilePath := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfileDir := $(dir $(mkfilePath))
@@ -15,24 +8,46 @@ realfileDir := $(realpath $(mkfileDir))
 
 preFiles := $(mkfileDir)/nix.org $(mkfileDir)/flake.org $(mkfileDir)/tests.org $(mkfileDir)/README.org
 
-pnCommand := nix eval --show-trace --impure --expr '(import $(realfileDir)).pname'
-projectName := $(subst ",,$(shell (find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null || :) && ($(pnCommand) || ((org-tangle -f $(preFiles) > /dev/null) && $(pnCommand)))))
+removeTangleBackups := find $(mkfileDir) -name '.\#*.org*' -print | xargs rm &> /dev/null || :
+
+define fallbackCommand
+($(removeTangleBackups)) && ($1 || ((org-tangle -f $2 > /dev/null) && $1))
+endef
+
+define preFallback
+$(call fallbackCommand,$1,$(preFiles))
+endef
+
+define nixShell
+nix-shell -E '(import $(realfileDir)).devShells.$${builtins.currentSystem}.makeshell-$1' --show-trace --run
+endef
+
+define quickShell
+$(call preFallback,nix-shell -E 'with (import $(realfileDir)).pkgs.$${builtins.currentSystem}; with lib; mkShell { buildInputs = flatten [ $1 ]; }' --show-trace)
+endef
+
+projectName := $(subst ",,$(shell $(call preFallback,nix eval --show-trace --impure --expr '(import $(realfileDir)).pname')))
 ifndef projectName
 $(error Sorry; unable to get the name of the project)
 endif
 
-typeCommand := nix eval --show-trace --impure --expr '(import $(realfileDir)).type'
-type := $(subst ",,$(shell (find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null || :) && ($(typeCommand) || ((org-tangle -f $(preFiles) > /dev/null) && $(typeCommand)))))
+type := $(subst ",,$(shell $(call preFallback,nix eval --show-trace --impure --expr '(import $(realfileDir)).type')))
 ifndef type
 $(error Sorry; unable to get the type of project)
 endif
 
 files := $(preFiles) $(mkfileDir)/$(projectName)
+
+define fallback
+$(call fallbackCommand,$1,$(files))
+endef
+
 tangleTask := $(shell [ -e $(mkfileDir)/tests -o -e $(mkfileDir)/tests.org ] && echo test || echo tangle)
 addCommand := git -C $(mkfileDir) add .
+updateCommand := $(call fallback,nix flake update --show-trace $(realfileDir))
 
 define tangleCommand
-(($(call nixShell,general) "org-tangle -f $1") || org-tangle -f $1) && $(addCommand)
+($(removeTangleBackups)) && (($(call nixShell,general) "org-tangle -f $1") || org-tangle -f $1) && $(addCommand)
 endef
 
 define wildcardValue
@@ -50,20 +65,20 @@ push: commit
 
 update: add
 ifeq ($(projectName), settings)
-|$(shell nix eval --impure --expr 'with (import $(realfileDir)); with pkgs.$${builtins.currentSystem}.lib; "nix flake lock $(realfileDir) --update-input $${concatStringsSep " --update-input " (filter (input: ! ((elem input [ "nixos-master" "nixos-unstable" ]) || (hasSuffix "-small" input))) (attrNames inputs))}"' | tr -d '"')
+|$(shell $(call fallback,nix eval --impure --expr 'with (import $(realfileDir)); with pkgs.$${builtins.currentSystem}.lib; "nix flake lock $(realfileDir) --update-input $${concatStringsSep " --update-input " (filter (input: ! ((elem input [ "nixos-master" "nixos-unstable" ]) || (hasSuffix "-small" input))) (attrNames inputs))}"' | tr -d '"'))
 else
-|nix flake update $(realfileDir)
+|$(updateCommand)
 endif
 
-update-%: updateInput := nix flake lock $(realfileDir) --update-input
+update-%: updateInput := nix flake lock $(realfileDir) --show-trace --update-input
 update-%: add
 |$(eval input := $(call wildcardValue,$@))
 ifeq ($(input), settings)
-|-[ $(projectName) != "settings" ] && $(updateInput) $(input)
+|-[ $(projectName) != "settings" ] && $(call fallback,$(updateInput) $(input))
 else ifeq ($(input), all)
-|nix flake update $(realfileDir)
+|$(updateCommand)
 else
-|$(updateInput) $(input)
+|$(call fallback,$(updateInput) $(input))
 endif
 
 pre-tangle: update-settings
@@ -85,7 +100,7 @@ ttu: $(tangleTask) update
 ttu-%: $(tangleTask) update-%
 
 develop: tu
-|nix develop --show-trace "$(realfileDir)#makeshell-$(type)"
+|$(call fallback,nix develop --show-trace "$(realfileDir)#makeshell-$(type)")
 
 shell: tu
 |$(call quickShell,$(pkgs))
@@ -94,25 +109,25 @@ shell-%: tu
 |$(call quickShell,(with $(call wildcardValue,$@); [ $(pkgs) ]))
 
 develop-%: tu
-|nix develop --show-trace "$(realfileDir)#$(call wildcardValue,$@)"
+|$(call fallback,nix develop --show-trace "$(realfileDir)#$(call wildcardValue,$@)")
 
 repl: tu
-|$(call nixShell,$(type)) "$(type)"
+|$(call fallback,$(call nixShell,$(type)) "$(type)")
 
 build: tu
-|nix build --show-trace "$(realfileDir)"
+|$(call fallback,nix build --show-trace "$(realfileDir)")
 
 build-%: tu
-|nix build --show-trace "$(realfileDir)#$(call wildcardValue,$@)"
+|$(call fallback,nix build --show-trace "$(realfileDir)#$(call wildcardValue,$@)")
 
 run: tu
-|export PPWD=$$(pwd) && cd $(mkfileDir) && $(call nixShell,$(type)) "$(command)" && cd $PPWD
+|export PPWD=$$(pwd) && cd $(mkfileDir) && $(call fallback,$(call nixShell,$(type)) "$(command)") && cd $PPWD
 
 run-%: tu
-|nix run --show-trace "$(realfileDir)#$(call wildcardValue,$@)"
+|$(call fallback,nix run --show-trace "$(realfileDir)#$(call wildcardValue,$@)")
 
 define touch-test-command
-export PPWD=$$(pwd) && cd $(mkfileDir) && $(call nixShell,$(type)) "touch $1 && $(type) $1" && cd $PPWD
+export PPWD=$$(pwd) && cd $(mkfileDir) && $(call fallback,$(call nixShell,$(type))) "touch $1 && $(type) $1" && cd $PPWD
 endef
 
 touch-test: tu
@@ -127,7 +142,6 @@ quick: tangle push
 super: ttu push
 
 super-%: ttu-% push ;
-
 poetry2setup: tu
 |$(call nixShell,$(type)) "cd $(mkfileDir) && poetry2setup > $(mkfileDir)/setup.py && cd -"
 

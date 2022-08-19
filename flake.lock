@@ -1674,11 +1674,11 @@
         "sysget": "sysget_3"
       },
       "locked": {
-        "lastModified": 1660881204,
-        "narHash": "sha256-mUMN9iOHKn7BiFCW/IQhYA22u+ILVprrKPi6762vAXs=",
+        "lastModified": 1660881652,
+        "narHash": "sha256-j7/SLW6eNgpXJJknxt+lz/qFZGvHTzfS8PXBOz+5RhM=",
         "owner": "sylvorg",
         "repo": "settings",
-        "rev": "88e4b3e796c1e5f3335f4721ede4479b1e476d1b",
+        "rev": "43578302e02c16fef49bcb4574d85823d59fa3f3",
         "type": "github"
       },
       "original": {
