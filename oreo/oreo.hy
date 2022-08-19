@@ -253,14 +253,14 @@
 
 (setv help (.get kwargs "help" ""))
 
-(when (setx self.xor (.pop kwargs "xor" (,)))
+(when (setx self.xor (.pop kwargs "xor" #()))
       (setv self.xor-len (len self.xor)
             self.xor-joined (.static/opt-joined self.__class__ name self.xor self.xor-len)
             self.xor-help #[f[is mutually exclusive with {(.option? self.__class__ self.xor-len)} {self.xor-joined}.]f]
             help (.static/gen-help self.__class__ help self.xor-help)))
 
 (setv self.one-req (or (.pop kwargs "one_req" None)
-                       (.pop kwargs "one-req" (,))))
+                       (.pop kwargs "one-req" #())))
 (when self.one-req
       (setv self.one-req-len (len self.one-req)
             self.one-req-joined (.static/opt-joined self.__class__ name self.one-req self.one-req-len)
@@ -268,7 +268,7 @@
             help (.static/gen-help self.__class__ help self.one-req-help)))
 
 (setv self.req-one-of (or (.pop kwargs "req_one_of" None)
-                          (.pop kwargs "req-one-of" (,))))
+                          (.pop kwargs "req-one-of" #())))
 (when self.req-one-of
       (setv self.req-one-of-len (len self.req-one-of)
             self.req-one-of-joined (.static/opt-joined self.__class__ name self.req-one-of self.req-one-of-len)
@@ -276,7 +276,7 @@
             help (.static/gen-help self.__class__ help self.req-one-of-help)))
 
 (setv self.req-all-of (or (.pop kwargs "req_all_of" None)
-                          (.pop kwargs "req-all-of" (,))))
+                          (.pop kwargs "req-all-of" #())))
 (when self.req-all-of
       (setv self.req-all-of-len (len self.req-all-of)
             self.req-all-of-joined (.static/opt-joined self.__class__ name self.req-all-of self.req-all-of-len)

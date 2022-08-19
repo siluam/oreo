@@ -16,13 +16,13 @@ realfileDir := $(realpath $(mkfileDir))
 preFiles := $(mkfileDir)/nix.org $(mkfileDir)/flake.org $(mkfileDir)/tests.org $(mkfileDir)/README.org
 
 pnCommand := nix eval --show-trace --impure --expr '(import $(realfileDir)).pname'
-projectName := $(subst ",,$(shell (find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null || :) && ($(pnCommand) || ((org-tangle -f $(preFiles) &> /dev/null) && $(pnCommand)))))
+projectName := $(subst ",,$(shell (find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null || :) && ($(pnCommand) || ((org-tangle -f $(preFiles) > /dev/null) && $(pnCommand)))))
 ifndef projectName
 $(error Sorry; unable to get the name of the project)
 endif
 
 typeCommand := nix eval --show-trace --impure --expr '(import $(realfileDir)).type'
-type := $(subst ",,$(shell (find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null || :) && ($(typeCommand) || ((org-tangle -f $(preFiles) &> /dev/null) && $(typeCommand)))))
+type := $(subst ",,$(shell (find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null || :) && ($(typeCommand) || ((org-tangle -f $(preFiles) > /dev/null) && $(typeCommand)))))
 ifndef type
 $(error Sorry; unable to get the type of project)
 endif
@@ -85,7 +85,7 @@ ttu: $(tangleTask) update
 ttu-%: $(tangleTask) update-%
 
 develop: tu
-|nix develop "$(realfileDir)#makeshell-$(type)"
+|nix develop --show-trace "$(realfileDir)#makeshell-$(type)"
 
 shell: tu
 |$(call quickShell,$(pkgs))
@@ -94,16 +94,33 @@ shell-%: tu
 |$(call quickShell,(with $(call wildcardValue,$@); [ $(pkgs) ]))
 
 develop-%: tu
-|nix develop "$(realfileDir)#$(call wildcardValue,$@)"
+|nix develop --show-trace "$(realfileDir)#$(call wildcardValue,$@)"
 
 repl: tu
 |$(call nixShell,$(type)) "$(type)"
 
+build: tu
+|nix build --show-trace "$(realfileDir)"
+
 build-%: tu
-|nix build "$(realfileDir)#$(call wildcardValue,$@)"
+|nix build --show-trace "$(realfileDir)#$(call wildcardValue,$@)"
+
+run: tu
+|export PPWD=$$(pwd) && cd $(mkfileDir) && $(call nixShell,$(type)) "$(command)" && cd $PPWD
 
 run-%: tu
-|nix run "$(realfileDir)#$(call wildcardValue,$@)"
+|nix run --show-trace "$(realfileDir)#$(call wildcardValue,$@)"
+
+define touch-test-command
+export PPWD=$$(pwd) && cd $(mkfileDir) && $(call nixShell,$(type)) "touch $1 && $(type) $1" && cd $PPWD
+endef
+
+touch-test: tu
+|$(call touch-test-command,$(file))
+
+touch-test-%: tu
+|$(eval file := $(mkfileDir)/$(call wildcardValue,$@))
+|$(call touch-test-command,$(file))
 
 quick: tangle push
 
@@ -120,7 +137,7 @@ touch-tests:
 tut: tu touch-tests
 
 define pytest
-$(call nixShell,$(type)) "pytest $1 $(mkfileDir)"
+$(call nixShell,$(type)) "pytest --randomly-seed=1296887350 $1 $(mkfileDir)"
 endef
 
 test: tut
