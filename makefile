@@ -1,4 +1,3 @@
-
 .RECIPEPREFIX := |
 .DEFAULT_GOAL := tangle
 
@@ -19,11 +18,11 @@ $(call fallbackCommand,$1,$(preFiles))
 endef
 
 define nixShell
-nix-shell -E '(import $(realfileDir)).devShells.$${builtins.currentSystem}.makeshell-$1' --show-trace --run
+nix-shell -E '(import $(realfileDir)).devShells.$${builtins.currentSystem}.makefile-$1' --show-trace --run
 endef
 
 define quickShell
-$(call preFallback,nix-shell -E 'with (import $(realfileDir)).pkgs.$${builtins.currentSystem}; with lib; mkShell { buildInputs = flatten [ $1 ]; }' --show-trace)
+nix-shell -E 'with (import $(realfileDir)).pkgs.$${builtins.currentSystem}; with lib; mkShell { buildInputs = flatten [ $1 ]; }' --show-trace
 endef
 
 projectName := $(subst ",,$(shell $(call preFallback,nix eval --show-trace --impure --expr '(import $(realfileDir)).pname')))
@@ -82,7 +81,7 @@ else
 endif
 
 pre-tangle: update-settings
-|-find $(mkfileDir) -name '.#*.org*' -print | xargs rm &> /dev/null
+|$(removeTangleBackups)
 
 tangle: pre-tangle
 |$(call tangleCommand,$(files))
@@ -100,7 +99,7 @@ ttu: $(tangleTask) update
 ttu-%: $(tangleTask) update-%
 
 develop: tu
-|$(call fallback,nix develop --show-trace "$(realfileDir)#makeshell-$(type)")
+|nix develop --show-trace "$(realfileDir)#makefile-$(type)"
 
 shell: tu
 |$(call quickShell,$(pkgs))
@@ -109,25 +108,27 @@ shell-%: tu
 |$(call quickShell,(with $(call wildcardValue,$@); [ $(pkgs) ]))
 
 develop-%: tu
-|$(call fallback,nix develop --show-trace "$(realfileDir)#$(call wildcardValue,$@)")
+|nix develop --show-trace "$(realfileDir)#$(call wildcardValue,$@)"
 
 repl: tu
-|$(call fallback,$(call nixShell,$(type)) "$(type)")
+|$(call nixShell,$(type)) "$(type)"
 
 build: tu
-|$(call fallback,nix build --show-trace "$(realfileDir)")
+|nix build --show-trace "$(realfileDir)"
 
 build-%: tu
-|$(call fallback,nix build --show-trace "$(realfileDir)#$(call wildcardValue,$@)")
+|nix build --show-trace "$(realfileDir)#$(call wildcardValue,$@)"
 
 run: tu
-|export PPWD=$$(pwd) && cd $(mkfileDir) && $(call fallback,$(call nixShell,$(type)) "$(command)") && cd $PPWD
+|export PPWD=$$(pwd) && cd $(mkfileDir) && $(call nixShell,$(type)) "$(command)" && cd $PPWD
 
 run-%: tu
-|$(call fallback,nix run --show-trace "$(realfileDir)#$(call wildcardValue,$@)")
+|nix run --show-trace "$(realfileDir)#$(call wildcardValue,$@)" -- $(args)
+
+rund: run-default
 
 define touch-test-command
-export PPWD=$$(pwd) && cd $(mkfileDir) && $(call fallback,$(call nixShell,$(type))) "touch $1 && $(type) $1" && cd $PPWD
+export PPWD=$$(pwd) && cd $(mkfileDir) && $(call nixShell,$(type)) "touch $1 && $(type) $1" && cd $PPWD
 endef
 
 touch-test: tu
@@ -142,6 +143,7 @@ quick: tangle push
 super: ttu push
 
 super-%: ttu-% push ;
+
 poetry2setup: tu
 |$(call nixShell,$(type)) "cd $(mkfileDir) && poetry2setup > $(mkfileDir)/setup.py && cd -"
 
@@ -151,7 +153,7 @@ touch-tests:
 tut: tu touch-tests
 
 define pytest
-$(call nixShell,$(type)) "pytest --randomly-seed=1296887350 $1 $(mkfileDir)"
+$(call nixShell,$(type)) "pytest $1 $(mkfileDir)"
 endef
 
 test: tut

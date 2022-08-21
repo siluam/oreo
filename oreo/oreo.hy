@@ -6,7 +6,7 @@
 (eval-and-compile (import os hy))
 (eval-and-compile (import pathlib [Path]))
 
-(import addict [Dict :as D])
+(import addict [Dict])
 (import autoslot [SlotsMeta])
 (import collections [OrderedDict])
 (import collections.abc [Iterable])
@@ -14,6 +14,7 @@
 (import hy [mangle unmangle])
 (import hyrule [dec])
 (import importlib.util [spec-from-file-location module-from-spec])
+(import ipaddress [IPv4Address IPv6Address])
 (import itertools [islice])
 (import rich [print])
 (import rich.pretty [pprint])
@@ -44,7 +45,7 @@
           `(do (require oreo.oreo [with-cwd :as ~with-cwd]) (let ~vars (~with-cwd ~dir ~@body))))
 
 (defn cprint [obj]
-      (if (isinstance obj #(str bytes bytearray))
+      (if (isinstance obj #(str bytes bytearray IPv4Address IPv6Address))
           (print obj)
           (pprint obj)))
 
@@ -144,12 +145,12 @@
       (return (filter None all-parts)))
 
 (defn recursive-unmangle [dct]
-      (return (D (dfor [key value]
-                       (.items dct)
-                       [(unmangle key)
-                        (if (isinstance value dict)
-                            (recursive-unmangle value)
-                            value)]))))
+      (return (Dict (dfor [key value]
+                          (.items dct)
+                          [(unmangle key)
+                           (if (isinstance value dict)
+                               (recursive-unmangle value)
+                               value)]))))
 
 (defn remove-fix-n [rfix string fix [n 1]]
       (defn inner [string] ((getattr string (+ "remove" rfix)) fix))

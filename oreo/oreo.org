@@ -25,7 +25,7 @@
 ** From
 
 #+begin_src hy
-(import addict [Dict :as D])
+(import addict [Dict])
 (import autoslot [SlotsMeta])
 (import collections [OrderedDict])
 (import collections.abc [Iterable])
@@ -33,6 +33,7 @@
 (import hy [mangle unmangle])
 (import hyrule [dec])
 (import importlib.util [spec-from-file-location module-from-spec])
+(import ipaddress [IPv4Address IPv6Address])
 (import itertools [islice])
 (import rich [print])
 (import rich.pretty [pprint])
@@ -97,7 +98,7 @@ Adapted from [[https://stackoverflow.com/users/1451346/kodiologist][Kodiologist'
 
 #+begin_src hy
 (defn cprint [obj]
-      (if (isinstance obj #(str bytes bytearray))
+      (if (isinstance obj #(str bytes bytearray IPv4Address IPv6Address))
           (print obj)
           (pprint obj)))
 #+end_src
@@ -255,12 +256,12 @@ Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given
 
 #+begin_src hy
 (defn recursive-unmangle [dct]
-      (return (D (dfor [key value]
-                       (.items dct)
-                       [(unmangle key)
-                        (if (isinstance value dict)
-                            (recursive-unmangle value)
-                            value)]))))
+      (return (Dict (dfor [key value]
+                          (.items dct)
+                          [(unmangle key)
+                           (if (isinstance value dict)
+                               (recursive-unmangle value)
+                               value)]))))
 #+end_src
 
 * Remove N Times
