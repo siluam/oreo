@@ -41,7 +41,6 @@ define fallback
 $(call fallbackCommand,$1,$(files))
 endef
 
-tangleTask := $(shell [ -e $(mkfileDir)/tests -o -e $(mkfileDir)/tests.org ] && echo test || echo tangle)
 addCommand := git -C $(mkfileDir) add .
 updateCommand := $(call fallback,nix flake update --show-trace $(realfileDir))
 
@@ -72,13 +71,7 @@ endif
 update-%: updateInput := nix flake lock $(realfileDir) --show-trace --update-input
 update-%: add
 |$(eval input := $(call wildcardValue,$@))
-ifeq ($(input), settings)
-|-[ $(projectName) != "settings" ] && $(call fallback,$(updateInput) $(input))
-else ifeq ($(input), all)
-|$(updateCommand)
-else
-|$(call fallback,$(updateInput) $(input))
-endif
+|([ "$(input)" == "settings" ] && [ "$(projectName)" != "settings" ] && $(call fallback,$(updateInput) $(input))) || ([ "$(input)" == "all" ] && $(updateCommand)) || $(call fallback,$(updateInput) $(input))
 
 pre-tangle: update-settings
 |$(removeTangleBackups)
@@ -92,11 +85,7 @@ tangle-%: pre-tangle
 
 tu: tangle update
 
-tu-%: tangle update-%
-
-ttu: $(tangleTask) update
-
-ttu-%: $(tangleTask) update-%
+tu-%: tangle update-% ;
 
 develop: tu
 |nix develop --show-trace "$(realfileDir)#makefile-$(type)"
@@ -120,7 +109,7 @@ build-%: tu
 |nix build --show-trace "$(realfileDir)#$(call wildcardValue,$@)"
 
 run: tu
-|export PPWD=$$(pwd) && cd $(mkfileDir) && $(call nixShell,$(type)) "$(command)" && cd $PPWD
+|export PPWD=$$(pwd) && cd $(mkfileDir) && $(call nixShell,$(type)) "$(command)" && cd $$PPWD
 
 run-%: tu
 |nix run --show-trace "$(realfileDir)#$(call wildcardValue,$@)" -- $(args)
@@ -128,7 +117,7 @@ run-%: tu
 rund: run-default
 
 define touch-test-command
-export PPWD=$$(pwd) && cd $(mkfileDir) && $(call nixShell,$(type)) "touch $1 && $(type) $1" && cd $PPWD
+export PPWD=$$(pwd) && cd $(mkfileDir) && $(call nixShell,$(type)) "touch $1 && $(type) $1" && cd $$PPWD
 endef
 
 touch-test: tu
@@ -140,20 +129,20 @@ touch-test-%: tu
 
 quick: tangle push
 
-super: ttu push
+super: tu push
 
-super-%: ttu-% push ;
+super-%: tu-% push ;
 
 poetry2setup: tu
 |$(call nixShell,$(type)) "cd $(mkfileDir) && poetry2setup > $(mkfileDir)/setup.py && cd -"
 
 touch-tests:
-|find $(mkfileDir)/tests -print | grep -v __pycache__ | xargs touch
+|-find $(mkfileDir)/tests -print | grep -v __pycache__ | xargs touch
 
 tut: tu touch-tests
 
 define pytest
-$(call nixShell,$(type)) "pytest $1 $(mkfileDir)"
+$(call nixShell,$(type)) "pytest $1 --suppress-no-test-exit-code $(mkfileDir)"
 endef
 
 test: tut
@@ -164,3 +153,5 @@ test-native: tut
 
 test-%: tut
 |$(call pytest,-m $(call wildcardValue,$@))
+
+super: test push

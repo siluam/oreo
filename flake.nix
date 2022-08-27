@@ -12,10 +12,7 @@
     };
     outputs = inputs@{ self, flake-utils, settings, ... }: with builtins; with settings.lib; with flake-utils.lib; settings.mkOutputs {
         inherit inputs;
-        callPackage = { buildPythonPackage
-            , callPackage
-            , pythonOlder
-            , poetry-core
+        callPackage = { stdenv
             , addict
             , autoslot
             , click
@@ -27,19 +24,11 @@
             , nixpkgs
             , toolz
             , pname
-            , pytestCheckHook
-            , pytest-randomly
-            , pytest-hy
-            , pytest-parametrized
             , rich
-        }: let owner = "syvlorg"; in buildPythonPackage rec {
+        }: j.mkPythonPackage self.pkgs.${stdenv.targetPlatform.system}.Pythons.${self.type}.pkgs (rec {
+            owner = "syvlorg";
             inherit pname;
-            version = j.pyVersion format src;
-            format = "pyproject";
-            disabled = pythonOlder "3.9";
             src = ./.;
-            buildInputs = [ poetry-core ];
-            nativeBuildInputs = buildInputs;
             propagatedBuildInputs = [
                 addict
                 autoslot
@@ -53,8 +42,6 @@
                 rich
                 toolz
             ];
-            checkInputs = [ pytestCheckHook pytest-hy pytest-randomly pytest-parametrized ];
-            pythonImportsCheck = [ pname ];
             postPatch = ''
                 substituteInPlace pyproject.toml --replace "rich = { git = \"https://github.com/${owner}/rich.git\", branch = \"master\" }" ""
                 substituteInPlace pyproject.toml --replace "hy = \"^0.24.0\"" ""
@@ -67,7 +54,7 @@
                 description = "The Stuffing for Other Functions!";
                 homepage = "https://github.com/${owner}/${pname}";
             };
-        };
+        });
         pname = "oreo";
         type = "hy";
     };
