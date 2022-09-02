@@ -228,7 +228,7 @@
       (-> name
           (remove-prefix-n "-" :n 2)
           (.replace "-" "_")
-          (.lower)))
+          .lower))
 
 (defn [staticmethod] static/opt-joined [name opt-val opt-len]
       (if (= opt-len 1)

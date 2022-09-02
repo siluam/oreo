@@ -424,7 +424,7 @@ All options are adapted from [[https://stackoverflow.com/users/7311767/stephen-r
       (-> name
           (remove-prefix-n "-" :n 2)
           (.replace "-" "_")
-          (.lower)))
+          .lower))
 #+end_src
 
 **** Joined Options

@@ -28,6 +28,7 @@ poetry2setup = "*"
 pytest-hy = "*"
 pytest-randomly = "*"
 pytest-parametrized = "*"
+pytest-sugar = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
