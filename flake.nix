@@ -2,6 +2,7 @@
     description = "The Stuffing for Other Functions!";
     inputs = rec {
         settings.url = github:sylvorg/settings;
+        titan.url = github:syvlorg/titan;
         py3pkg-rich.url = github:syvlorg/rich;
         py3pkg-pytest-hy.url = github:syvlorg/pytest-hy;
         flake-utils.url = github:numtide/flake-utils;
