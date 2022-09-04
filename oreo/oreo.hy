@@ -317,8 +317,8 @@
 
 (defn __init__ [self #* args #** kwargs]
 
-(setv super-dict (dict (enumerate args)))
-(.update super-dict kwargs)
+(setv super-dict (| (dict (enumerate args)) kwargs))
+;; (.update super-dict kwargs)
 
 (.__init__ (super) (gfor [k v] (.items super-dict) #(k v)))
 

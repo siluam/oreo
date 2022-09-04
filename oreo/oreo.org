@@ -649,8 +649,8 @@ A play on words between ~ginseng~ tea and ~gen-string~!
 *** Create and Update Super Dict
 
 #+begin_src hy
-(setv super-dict (dict (enumerate args)))
-(.update super-dict kwargs)
+(setv super-dict (| (dict (enumerate args)) kwargs))
+;; (.update super-dict kwargs)
 #+end_src
 
 **** Initialize Super with Super Dict
