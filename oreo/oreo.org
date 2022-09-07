@@ -1,5 +1,3 @@
-#+setupfile: /home/shadowrylander/settings/README.org
-
 #+property: header-args:hy+ :tangle yes
 
 * Rich Traceback

@@ -47,14 +47,11 @@
                 substituteInPlace pyproject.toml --replace "rich = { git = \"https://github.com/${owner}/rich.git\", branch = \"master\" }" ""
                 substituteInPlace pyproject.toml --replace "hy = \"^0.24.0\"" ""
                 substituteInPlace pyproject.toml --replace "hyrule = \"^0.2\"" ""
-                substituteInPlace setup.py --replace "'rich @ git+https://github.com/${owner}/rich.git@master'," ""
-                substituteInPlace setup.py --replace "'hy>=0.24.0,<0.25.0'," ""
-                substituteInPlace setup.py --replace "'hyrule>=0.2,<0.3'," ""
+                substituteInPlace setup.py --replace "'rich @ git+https://github.com/${owner}/rich.git@master'," "" || :
+                substituteInPlace setup.py --replace "'hy>=0.24.0,<0.25.0'," "" || :
+                substituteInPlace setup.py --replace "'hyrule>=0.2,<0.3'," "" || :
             '';
-            meta = {
-                description = "The Stuffing for Other Functions!";
-                homepage = "https://github.com/${owner}/${pname}";
-            };
+            meta.description = "The Stuffing for Other Functions!";
         });
         pname = "oreo";
         type = "hy";
