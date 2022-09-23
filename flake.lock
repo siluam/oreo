@@ -2003,11 +2003,11 @@
         "titan": "titan_2"
       },
       "locked": {
-        "lastModified": 1663971990,
-        "narHash": "sha256-e1AkPrFb6d3YuFOL7aaDWJQqSel6PQ/BK8ZCgEJlIgA=",
+        "lastModified": 1663974875,
+        "narHash": "sha256-CZtrN6BAIG45QhJpvVcFiPCh484v+Xat/ePGMlx8Awk=",
         "owner": "syvlorg",
         "repo": "pytest-hy",
-        "rev": "d48b8edb93cb8d3906b3f35371054d73d24b342a",
+        "rev": "27fa8dede6ed8d79985f28fb4ca3d165e48c2687",
         "type": "github"
       },
       "original": {
@@ -2024,11 +2024,11 @@
         "titan": "titan_4"
       },
       "locked": {
-        "lastModified": 1663972145,
-        "narHash": "sha256-dQrciHPDZ15+K0diPczIhPC6TyQNIxJ0N2iHGjw+L0U=",
+        "lastModified": 1663975012,
+        "narHash": "sha256-esHIWVkuwm/jSROiffibHeQL9pWNEbZTOxT2YqlK95U=",
         "owner": "syvlorg",
         "repo": "rich",
-        "rev": "792a7d9140ea71883e8651db6d3aadb242d40893",
+        "rev": "a30101e2d98ee2acc3e5681f89cdd1a0a4c6ba45",
         "type": "github"
       },
       "original": {
@@ -2287,11 +2287,11 @@
         "uglifycss": "uglifycss"
       },
       "locked": {
-        "lastModified": 1663971912,
-        "narHash": "sha256-w5IEn7bMBhbXHNPRhg58skOnOWBA2PY+716/nMgQhZQ=",
+        "lastModified": 1663974785,
+        "narHash": "sha256-Ra190A2SP8U4KKJ356B6VT7KhWa1S5MpTtgCg8UtM+Q=",
         "owner": "sylvorg",
         "repo": "settings",
-        "rev": "347ff01cf1677d3eceb9d732e5e35e20defeb3b4",
+        "rev": "c756b947ccf8c32e5bb2a90b83fb528eebd0ca64",
         "type": "github"
       },
       "original": {
@@ -2336,11 +2336,11 @@
         "uglifycss": "uglifycss_2"
       },
       "locked": {
-        "lastModified": 1663971912,
-        "narHash": "sha256-w5IEn7bMBhbXHNPRhg58skOnOWBA2PY+716/nMgQhZQ=",
+        "lastModified": 1663974785,
+        "narHash": "sha256-Ra190A2SP8U4KKJ356B6VT7KhWa1S5MpTtgCg8UtM+Q=",
         "owner": "sylvorg",
         "repo": "settings",
-        "rev": "347ff01cf1677d3eceb9d732e5e35e20defeb3b4",
+        "rev": "c756b947ccf8c32e5bb2a90b83fb528eebd0ca64",
         "type": "github"
       },
       "original": {
@@ -2385,11 +2385,11 @@
         "uglifycss": "uglifycss_3"
       },
       "locked": {
-        "lastModified": 1663971912,
-        "narHash": "sha256-w5IEn7bMBhbXHNPRhg58skOnOWBA2PY+716/nMgQhZQ=",
+        "lastModified": 1663974785,
+        "narHash": "sha256-Ra190A2SP8U4KKJ356B6VT7KhWa1S5MpTtgCg8UtM+Q=",
         "owner": "sylvorg",
         "repo": "settings",
-        "rev": "347ff01cf1677d3eceb9d732e5e35e20defeb3b4",
+        "rev": "c756b947ccf8c32e5bb2a90b83fb528eebd0ca64",
         "type": "github"
       },
       "original": {
@@ -2457,11 +2457,11 @@
         "poetry2setup": "poetry2setup"
       },
       "locked": {
-        "lastModified": 1663971596,
-        "narHash": "sha256-OpuPrsbtDWLMEXxOJea949VRCjNHUcI7VX/SWADlVxc=",
+        "lastModified": 1663974535,
+        "narHash": "sha256-MzDgrgKg+CR3ufC/pZd05Tu6Y5ylZtrbYOc5JhMzvHg=",
         "owner": "syvlorg",
         "repo": "titan",
-        "rev": "3b4a00978d32bd8809bf4825122311a0265792bb",
+        "rev": "458706f79a4621ba20d8a14e64bd945731ae0c75",
         "type": "github"
       },
       "original": {
@@ -2478,11 +2478,11 @@
         "poetry2setup": "poetry2setup_2"
       },
       "locked": {
-        "lastModified": 1663971596,
-        "narHash": "sha256-OpuPrsbtDWLMEXxOJea949VRCjNHUcI7VX/SWADlVxc=",
+        "lastModified": 1663974535,
+        "narHash": "sha256-MzDgrgKg+CR3ufC/pZd05Tu6Y5ylZtrbYOc5JhMzvHg=",
         "owner": "syvlorg",
         "repo": "titan",
-        "rev": "3b4a00978d32bd8809bf4825122311a0265792bb",
+        "rev": "458706f79a4621ba20d8a14e64bd945731ae0c75",
         "type": "github"
       },
       "original": {
@@ -2499,11 +2499,11 @@
         "poetry2setup": "poetry2setup_3"
       },
       "locked": {
-        "lastModified": 1663971596,
-        "narHash": "sha256-OpuPrsbtDWLMEXxOJea949VRCjNHUcI7VX/SWADlVxc=",
+        "lastModified": 1663974535,
+        "narHash": "sha256-MzDgrgKg+CR3ufC/pZd05Tu6Y5ylZtrbYOc5JhMzvHg=",
         "owner": "syvlorg",
         "repo": "titan",
-        "rev": "3b4a00978d32bd8809bf4825122311a0265792bb",
+        "rev": "458706f79a4621ba20d8a14e64bd945731ae0c75",
         "type": "github"
       },
       "original": {
@@ -2520,11 +2520,11 @@
         "poetry2setup": "poetry2setup_4"
       },
       "locked": {
-        "lastModified": 1663971596,
-        "narHash": "sha256-OpuPrsbtDWLMEXxOJea949VRCjNHUcI7VX/SWADlVxc=",
+        "lastModified": 1663974535,
+        "narHash": "sha256-MzDgrgKg+CR3ufC/pZd05Tu6Y5ylZtrbYOc5JhMzvHg=",
         "owner": "syvlorg",
         "repo": "titan",
-        "rev": "3b4a00978d32bd8809bf4825122311a0265792bb",
+        "rev": "458706f79a4621ba20d8a14e64bd945731ae0c75",
         "type": "github"
       },
       "original": {
@@ -2541,11 +2541,11 @@
         "poetry2setup": "poetry2setup_5"
       },
       "locked": {
-        "lastModified": 1663971596,
-        "narHash": "sha256-OpuPrsbtDWLMEXxOJea949VRCjNHUcI7VX/SWADlVxc=",
+        "lastModified": 1663974535,
+        "narHash": "sha256-MzDgrgKg+CR3ufC/pZd05Tu6Y5ylZtrbYOc5JhMzvHg=",
         "owner": "syvlorg",
         "repo": "titan",
-        "rev": "3b4a00978d32bd8809bf4825122311a0265792bb",
+        "rev": "458706f79a4621ba20d8a14e64bd945731ae0c75",
         "type": "github"
       },
       "original": {
@@ -2562,11 +2562,11 @@
         "poetry2setup": "poetry2setup_6"
       },
       "locked": {
-        "lastModified": 1663971596,
-        "narHash": "sha256-OpuPrsbtDWLMEXxOJea949VRCjNHUcI7VX/SWADlVxc=",
+        "lastModified": 1663974535,
+        "narHash": "sha256-MzDgrgKg+CR3ufC/pZd05Tu6Y5ylZtrbYOc5JhMzvHg=",
         "owner": "syvlorg",
         "repo": "titan",
-        "rev": "3b4a00978d32bd8809bf4825122311a0265792bb",
+        "rev": "458706f79a4621ba20d8a14e64bd945731ae0c75",
         "type": "github"
       },
       "original": {
