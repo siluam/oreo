@@ -1,10 +1,20 @@
 import rich.traceback as RichTraceback
-RichTraceback.install(show_locals = True)
 
-import hy
+RichTraceback.install(show_locals=True)
 
-hy.macros.require('oreo.oreo',
-    # The Python equivalent of `(require oreo.oreo *)`
-    None, assignments = 'ALL', prefix = '')
-hy.macros.require_reader('oreo.oreo', None, assignments = 'ALL')
-from oreo.oreo import *
+import hy as _hy
+
+_hy.macros.require(
+    "oreo.hy",
+    # The Python equivalent of `(require oreo.hy *)`
+    None,
+    assignments="ALL",
+    prefix="",
+)
+_hy.macros.require_reader("oreo.hy", None, assignments="ALL")
+from oreo.py import *
+from oreo.eclair import *
+from oreo.gensing import *
+from oreo.multi import *
+from oreo.option import *
+from oreo.passwords import *

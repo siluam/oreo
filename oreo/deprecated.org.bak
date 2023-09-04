@@ -11,13 +11,14 @@
 
 #+begin_src hy
 (import click)
+(import requests)
+(import secrets)
 #+end_src
 
 * Eval and Compile
 
 #+begin_src hy
 (eval-and-compile (import os hy))
-(eval-and-compile (import pathlib [Path]))
 #+end_src
 
 ** From
@@ -25,19 +26,30 @@
 #+begin_src hy
 (import addict [Dict])
 (import autoslot [SlotsMeta])
+(import base64 [urlsafe_b64encode :as b64e urlsafe_b64decode :as b64d])
 (import collections [OrderedDict])
-(import collections.abc [Iterable])
 (import contextlib [contextmanager])
+(import cryptography.fernet [Fernet])
+(import cryptography.hazmat.backends [default_backend])
+(import cryptography.hazmat.primitives [hashes])
+(import cryptography.hazmat.primitives.kdf.pbkdf2 [PBKDF2HMAC])
 (import hy [mangle unmangle])
-(import hyrule [dec])
+(import hyrule [inc dec])
 (import importlib.util [spec-from-file-location module-from-spec])
+(import importlib.machinery [SourceFileLoader])
 (import ipaddress [IPv4Address IPv6Address])
-(import itertools [islice])
+(import itertools [islice product])
+(import more-itertools [powerset unique-everseen])
+(import pathlib [Path])
+(import pytest [mark param])
+(import random [randint])
 (import rich [print])
 (import rich.pretty [pprint])
 (import rich.progress [Progress])
 (import time [sleep])
+(import types [ModuleType])
 (import uuid [uuid4])
+(import valiant [coll? module-installed])
 #+end_src
 
 *** Coconut
@@ -54,15 +66,15 @@
 [[https://github.com/pytoolz/toolz][Toolz]] and [[https://github.com/pytoolz/cytoolz/][CyToolz]]:
 
 #+begin_src hy
-(try (import cytoolz [first])
+(try (import cytoolz [first last])
      (except [ImportError]
-             (import toolz [first])))
+             (import toolz [first last])))
 #+end_src
 
 * Requires
 
 #+begin_src hy
-(require hyrule [-> assoc unless])
+(require hyrule [-> ->> assoc unless defmacro/g!])
 #+end_src
 
 * Assert
@@ -74,12 +86,12 @@
 * Run Code in Another Directory and Come Back
 
 #+begin_src hy
-(defmacro with-cwd [dir #* body]
-          (setv cwd (hy.gensym))
-          `(let [ ~cwd (.cwd Path) ]
-                (try (.chdir os ~dir)
-                     ~@body
-                     (finally (.chdir os ~cwd)))))
+(defmacro/g! with-cwd [dir #* body]
+             `(do (import os :as ~g!os pathlib [Path :as ~g!Path])
+                  (setv ~g!cwd (.cwd ~g!Path))
+                  (try ((. ~g!os chdir) ~dir)
+                       ~@body
+                       (finally ((. ~g!os chdir) ~g!cwd)))))
 #+end_src
 
 ** Also Set Variables
@@ -87,9 +99,10 @@
 Adapted from [[https://stackoverflow.com/users/1451346/kodiologist][Kodiologist's]] comment [[https://stackoverflow.com/questions/73084195/require-macros-from-the-same-file-in-another-macro#comment129093172_73084195][here]]:
 
 #+begin_src hy
-(defmacro let-cwd [dir vars #* body]
-          (setv with-cwd (hy.gensym))
-          `(do (require oreo.oreo [with-cwd :as ~with-cwd]) (let ~vars (~with-cwd ~dir ~@body))))
+(defmacro/g! let-cwd [dir vars #* body]
+             `(do (require oreo.oreo [with-cwd :as ~g!with-cwd])
+                  (let ~vars
+                       (~g!with-cwd ~dir ~@body))))
 #+end_src
 
 * Choose Print
@@ -126,36 +139,6 @@ and [[https://stackoverflow.com/users/210945/naught101][naught101's]] comment [[
                        (isinstance a type) (issubclass a typle)
                        True (or (issubclass (type a) typle)
                                  (isinstance a typle))))))
-#+end_src
-
-* Collection
-
-#+begin_src hy
-(defn coll? [coll]
-      (return (if (isinstance coll #(str bytes bytearray))
-                  False
-                  (try (iter coll)
-                       (except [TypeError]
-                               (isinstance coll Iterable))
-                       (else True)))))
-#+end_src
-
-* Module Installed
-
-Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given-the-full-path/#:~:text=Inside%20explicit%20method-,Using%20importlib%20Package,-The%20importlib%20package][here]]
-
-#+begin_src hy
-(defn module-installed [path]
-      (setv spec (-> os.path
-                     (.basename path)
-                     (.split ".")
-                     (get 0)
-                     (spec-from-file-location path)))
-      (return (if spec
-                  (do (setv module (module-from-spec spec))
-                      (.exec-module spec.loader module)
-                      module)
-                  False)))
 #+end_src
 
 * Single Use Import
@@ -256,10 +239,10 @@ Adapted from [[https://www.geeksforgeeks.org/how-to-import-a-python-module-given
 (defn recursive-unmangle [dct]
       (return (Dict (dfor [key value]
                           (.items dct)
-                          [(unmangle key)
-                           (if (isinstance value dict)
-                               (recursive-unmangle value)
-                               value)]))))
+                          (unmangle key)
+                          (if (isinstance value dict)
+                              (recursive-unmangle value)
+                              value)))))
 #+end_src
 
 * Remove N Times
@@ -313,6 +296,178 @@ Adapted from [[https://stackoverflow.com/users/11769765/friedrich][Friedrich's]]
 
 #+begin_src hy
 (defn int? [value] (return (and (isinstance value int) (not (isinstance value bool)))))
+#+end_src
+
+* Check if Palindrome
+
+#+begin_src hy
+(defn palindrome? [string [strict False]]
+      (let [ s (if strict string (.lower string))
+             l (len s) ]
+           (if (= (% l 2) 0)
+               (= (cut (cut s (// l 2)) None None -1) (cut s (// l 2) None))
+               (= (cut (cut s (// (dec l) 2)) None None -1) (cut s (// (inc l) 2) None)))))
+#+end_src
+
+* Generate Palindromes
+
+#+begin_src hy
+(defn genpal [[n 1] [odd None]]
+      (let [ p [] ]
+           (for [i (range n)]
+                (let [ o (if (is odd None) (randint 0 1) odd)
+                       c (lfor j (range (randint 0 100)) (chr (randint 0 255))) ]
+                     (.append p (.join "" (+ c (if o [ (chr (randint 0 255)) ] []) (cut c None None -1))))))
+           (return p)))
+#+end_src
+
+* All Possible Combinations Dictionary
+
+#+begin_src hy
+(defn apcd [keys values]
+      (->> (lfor s (powerset keys) (powerset (product s values)))
+           last
+           (map dict)))
+#+end_src
+
+** All Possible Options Dictionary
+
+#+begin_src hy
+(defn apod [keys values]
+      (gfor s (unique-everseen (apcd keys values)) :if (= (len s) (len keys)) s))
+#+end_src
+
+* Mark Parameters
+
+#+begin_src hy
+(defn mark-params [params [func None]]
+      (gfor p params (param p :marks (lfor [k v] (.items p) :if (if func (func k v) True) (getattr mark k)))))
+#+end_src
+
+** Mark All Possible Options Dictionary
+
+#+begin_src hy
+(defn mark-apod [keys values [func None]]
+      (mark-params (apod keys values) (or func (when (all (gfor v values (isinstance v bool))) (fn [k v] v)))))
+#+end_src
+
+* Counter
+
+Adapted from [[https://stackoverflow.com/users/37984/saffsd][saffsd's]] answer [[https://stackoverflow.com/a/829729/10827766][here]]:
+
+#+begin_src hy
+(defclass Counter []
+          (defn __init__ [self count]
+                (setv self.count (if (int? count)
+                                     count
+                                     (len count))))
+          (defn __nonzero__ [self]
+                (-= self.count 1)
+                (>= self.count 0))
+          (setv __bool__ __nonzero__))
+#+end_src
+
+* OAuth2 Bearer Authentication
+
+Adapted from [[https://stackoverflow.com/users/3831197/zhe][Zhe's]] answer [[https://stackoverflow.com/a/58055668/10827766][here]]:
+
+#+begin_src hy
+(defclass BearerAuth [requests.auth.AuthBase]
+          (defn __init__ [self token]
+                (setv self.token token))
+          (defn __call__ [self r]
+                (assoc r.headers "authorization" (+ "Authorization: Bearer " self.token))
+                (return r)))
+#+end_src
+
+* Password Encryption and Decryption
+
+Adapted from [[https://stackoverflow.com/users/100297/martijn-pieters][Martijn Pieters']] answer [[https://stackoverflow.com/a/55147077/10827766][here]]:
+
+#+begin_src hy
+(setv backend (default-backend)
+      iterations 100000
+      encoding "utf-8")
+
+(defn derive-key [password salt [iterations iterations]]
+      "Derive a secret key from a given password and salt"
+      (-> (PBKDF2HMAC :algorithm (.SHA256 hashes)
+                      :length 32
+                      :salt salt
+                      :iterations iterations
+                      :backend backend)
+          (.derive password)
+          b64e
+          return))
+
+(defn -password-encrypt [
+      func
+      message
+      password
+      [iterations iterations]
+      [salt (.token-bytes secrets 16)]
+      [encoding encoding]
+]
+      (let [ decryption (-> password
+                            (.encode encoding)
+                            (derive-key salt iterations)
+                            Fernet
+                            func
+                            b64d) ]
+           (-> (% b"%b%b%b" #(salt (.to-bytes iterations 4 "big") decryption))
+               b64e
+               return)))
+#+end_src
+
+** Regular
+
+Adapted from [[https://github.com/pyca/cryptography/blob/main/src/cryptography/fernet.py#L54][here]], [[https://github.com/pyca/cryptography/blob/main/src/cryptography/fernet.py#L58][here]], and [[https://stackoverflow.com/users/9910846/cheesus][cheesus']] answer [[https://stackoverflow.com/a/73599705][here]]:
+
+#+begin_src hy
+(defn password-encrypt-parts [
+      message
+      #* args
+      [iv (.token-bytes secrets 16)]
+      [encoding encoding]
+      #** kwargs
+]
+      (-password-encrypt
+            (fn [f] (._encrypt_from_parts f (.encode message encoding) 0 iv))
+            message
+            #* args
+            :encoding encoding
+            #** kwargs))
+#+end_src
+
+** Random
+*** Encryption
+
+#+begin_src hy
+(defn password-encrypt [
+      message
+      #* args
+      [encoding encoding]
+      #** kwargs
+]
+      (-password-encrypt
+            (fn [f] (.encrypt f (.encode message encoding)))
+            message
+            #* args
+            :encoding encoding
+            #** kwargs))
+#+end_src
+
+*** Decryption
+
+#+begin_src hy
+(defn password-decrypt [token password [encoding encoding]]
+      (let [ decoded (b64d token) ]
+           (-> (.encode password encoding)
+               (derive-key (cut decoded 0 16) (.from-bytes int (cut decoded 16 20) "big"))
+               Fernet
+               (.decrypt (b64e (cut decoded 20 None)))
+               (.decode encoding)
+               return)))
 #+end_src
 
 * The Meclair Class
@@ -422,7 +577,7 @@ All options are adapted from [[https://stackoverflow.com/users/7311767/stephen-r
       (-> name
           (remove-prefix-n "-" :n 2)
           (.replace "-" "_")
-          .lower))
+          (.lower)))
 #+end_src
 
 **** Joined Options
@@ -430,20 +585,20 @@ All options are adapted from [[https://stackoverflow.com/users/7311767/stephen-r
 #+begin_src hy
 (defn [staticmethod] static/opt-joined [name opt-val opt-len]
       (if (= opt-len 1)
-          (get opt-val 0)
-          (.join ", " (gfor opt opt-val :if (!= opt name) opt))))
+          #[f["{(get opt-val 0)}"]f]
+          #[f["{(.join "\", \"" (gfor opt opt-val :if (!= opt name) opt))}"]f]))
 #+end_src
 
 **** Option[s]
 
 #+begin_src hy
-(defn [staticmethod] option? [opt-len] (if (= opt-len 1) "option" "options"))
+(defn [staticmethod] option? [opt-len] (if (<= opt-len 2) "option" "options"))
 #+end_src
 
 **** Are Is?
 
 #+begin_src hy
-(defn [staticmethod] is? [opt-len] (if (= opt-len 1) "is" "are"))
+(defn [staticmethod] is? [opt-len] (if (<= opt-len 2) "is" "are"))
 #+end_src
 
 **** Da use?
@@ -489,7 +644,8 @@ Naming convention taken from [[https://click.palletsprojects.com/en/8.0.x/option
 ~xor:~ list of options this can't be used with
 
 #+begin_src hy
-(when (setx self.xor (.pop kwargs "xor" #()))
+(setv self.xor (.pop kwargs "xor" #()))
+(when self.xor
       (setv self.xor-len (len self.xor)
             self.xor-joined (.static/opt-joined self.__class__ name self.xor self.xor-len)
             self.xor-help #[f[is mutually exclusive with {(.option? self.__class__ self.xor-len)} {self.xor-joined}.]f]
@@ -575,19 +731,16 @@ given that the option ~xor~ is still being parsed by the program.
 (when (and (in self.name opts)
            self.xor
            (any (gfor opt self.xor (in opt opts))))
-      (raise (click.UsageError f"Sorry; {self.name} {self.xor-help}")))
+      (raise (click.UsageError #[f[Sorry; "{self.name}" {self.xor-help}]f])))
 #+end_src
 
 ***** One Required
 
-#+begin_src hy :tangle no
+#+begin_src hy
 (when (and self.one-req
            (not (in self.name opts))
            (not (any (gfor opt self.one-req (in opt opts)))))
-      (raise (click.UsageError (+ "Sorry! "
-                                  (if (= self.one-req-len 1) "One of " "")
-                                  self.one-req-joined
-                                  " is required."))))
+      (raise (click.UsageError #[f[Sorry; "{self.name}" {self.one-req-help}]f])))
 #+end_src
 
 ***** Requires One Of
@@ -596,7 +749,7 @@ given that the option ~xor~ is still being parsed by the program.
 (when (and (in self.name opts)
            self.req-one-of
            (not (any (gfor opt self.req-one-of (in opt opts)))))
-      (raise (click.UsageError f"Sorry; {self.name} {self.req-one-of-help}")))
+      (raise (click.UsageError #[f[Sorry; "{self.name}" {self.req-one-of-help}]f])))
 #+end_src
 
 ***** Requires All Of
@@ -605,7 +758,7 @@ given that the option ~xor~ is still being parsed by the program.
 (when (and (in self.name opts)
            self.req-all-of
            (not (all (gfor opt self.req-all-of (in opt opts)))))
-      (raise (click.UsageError f"Sorry; {self.name} {self.req-all-of-help}")))
+      (raise (click.UsageError #[f[Sorry; "{self.name}" {self.req-all-of-help}]f])))
 #+end_src
 
 **** Handle Parse Result for Super
@@ -717,7 +870,7 @@ A play on words between ~ginseng~ tea and ~gen-string~!
 #+begin_src hy
 (defn shifted [self #* args]
       (setv shift (.get-next-free-index self))
-      (return (dfor [i s] (enumerate args) [(+ i shift) s])))
+      (return (dfor [i s] (enumerate args) (+ i shift) s)))
 #+end_src
 
 *** Extend
@@ -797,7 +950,7 @@ Adapted from [[https://stackoverflow.com/users/3218806/maxbellec][maxbellec's]] 
 #+begin_src hy
 (defn __eq__ [self expr]
       (return (cond (isinstance expr self.__class__) (= (expr) (self))
-                    (isinstance expr dict) (= (.items self) (.items (dfor [k v] (.items expr) [(if (isinstance k hy.models.Keyword) k.name k) v])))
+                    (isinstance expr dict) (= (.items self) (.items (dfor [k v] (.items expr) (if (isinstance k hy.models.Keyword) k.name k) v)))
                     (coll? expr) (all (gfor [a b] (zip (.values self) expr :strict True) (= a b)))
                     (isinstance expr str) (= (self) expr)
                     True False)))

@@ -10,22 +10,19 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-addict = "*"
-autoslot = "*"
-click = "*"
-hy = "^0.24.0"
+python = "^3.10"
+cryptography = "*"
+hy = "^0.25.0"
 hyrule = "^0.2"
-nixpkgs = "*"
 more-itertools = "*"
-rich = { git = "https://github.com/syvlorg/rich.git", branch = "master" }
-toolz = "*"
+nixpkgs = "*"
+pytest = "*"
+valiant = { git = "https://github.com/syvlorg/valiant.git", branch = "main" }
 
 [tool.poetry.dev-dependencies]
-pytest = "^3.0"
 poetry = "*"
 poetry2setup = "*"
-pytest-hy = "*"
+pytest-hy = { git = "https://github.com/syvlorg/pytest-hy.git", branch = "master" }
 pytest-randomly = "*"
 pytest-parametrized = "*"
 pytest-sugar = "*"
@@ -43,10 +40,13 @@ markers = [
 	"first_last_n",
 	"flatten",
 	"gensing",
+	"get_un_mangled",
 	"let_cwd",
 	"ls",
+	"multi",
+	"palindrome",
+	"recursive_unmangle",
 	"remove_prefix_n",
 	"remove_suffix_n",
 	"with_cwd",
-    "eclair",
 ]

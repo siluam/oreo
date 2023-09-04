@@ -1,1 +1,2 @@
+#+setupfile: ./README.org
 #+include: ./README.org
