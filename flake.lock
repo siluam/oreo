@@ -102,8 +102,8 @@
         "xero-figlet-fonts": "xero-figlet-fonts"
       },
       "locked": {
-        "lastModified": 1693851010,
-        "narHash": "sha256-lV5j83lnb5ljYudy14P5gf9dbaEFk9RmxThfLwPvfAk=",
+        "lastModified": 1693853764,
+        "narHash": "sha256-yEXeyIEnMqXUFrnCGGHWXKS+gAWQlYtbo6VTgbm7Slo=",
         "submodules": true,
         "type": "git",
         "url": "file:///home/shadowrylander/shadowrylander/bundle"
